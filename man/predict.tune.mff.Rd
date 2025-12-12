@@ -24,8 +24,8 @@ generated during the tuning process.}
 \value{
 A list with:
 \describe{
-\item{preds}{A matrix of cluster-specific predicted values.}
-\item{weights}{The weight matrix rounded to four decimals if cluster number is not specified
+\item{mff_preds}{A matrix of cluster-specific predicted values.}
+\item{mff_weights}{The weight matrix rounded to four decimals if cluster number is not specified
 If the number of cluster is specified it returns a weight vector of the selected cluster.}
 }
 }

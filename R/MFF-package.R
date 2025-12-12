@@ -6,8 +6,7 @@
 #'
 #' Core features include:
 #' \itemize{
-#'   \item Probabilistic Fuzzy C-Means (PFCM)
-#'   \item GK-based fuzzy clustering
+#'   \item Fit a fuzzy-cluster–based meta-ensemble model.
 #'   \item Ensemble regression models (LM, Ridge, Lasso, Elastic Net, RF, XGBoost, LightGBM)
 #'   \item Model comparison and evaluation utilities (MAE, RMSE, MAPE, SMAPE, MSE, MedAE)
 #' }

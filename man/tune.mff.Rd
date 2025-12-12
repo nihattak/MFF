@@ -69,7 +69,7 @@ The search spans different parameter spaces depending on the selected method:
 \item \strong{FCM}: searches over \code{m} and \code{c}.
 \item \strong{GK}: searches over \code{m} and \code{c} with coarser steps.
 \item \strong{PFCM}: searches over \code{m}, \code{c}, and \code{eta}.
-\item \strong{K-means (MKF)}: searches only over \code{c}.
+\item \strong{K-Means}: searches only over \code{c}.
 }
 }
 \details{

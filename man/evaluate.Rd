@@ -16,7 +16,6 @@ the rows of \code{preds}.}
 \value{
 A data frame with the following columns:
 \describe{
-\item{Model}{Prediction label}
 \item{MAE}{Mean Absolute Error}
 \item{RMSE}{Root Mean Square Error}
 \item{MAPE}{Mean Absolute Percentage Error}

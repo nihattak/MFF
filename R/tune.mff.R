@@ -19,7 +19,7 @@
 #'   \item \strong{FCM}: searches over \code{m} and \code{c}.
 #'   \item \strong{GK}: searches over \code{m} and \code{c} with coarser steps.
 #'   \item \strong{PFCM}: searches over \code{m}, \code{c}, and \code{eta}.
-#'   \item \strong{K-means (MKF)}: searches only over \code{c}.
+#'   \item \strong{K-Means}: searches only over \code{c}.
 #' }
 #'
 #' @param pred_matrix A numeric matrix containing model predictions, where rows
@@ -149,7 +149,6 @@ tune.mff <- function(pred_matrix, y, max_c = 5, m_seq = seq(1.1, 3, by = 0.1),et
 
     if(logging){
       cat(i,"",sep = " ")
-      cat("\n")
     }
 
     current_metric <- min(mff_result$cluster_scores[,eval.method])
@@ -162,6 +161,8 @@ tune.mff <- function(pred_matrix, y, max_c = 5, m_seq = seq(1.1, 3, by = 0.1),et
       best_scores <- mff_result$cluster_scores
     }
   }
+
+  if(logging) cat("\n")
 
   idx <- unname(which.min(best_scores[,eval.method]))
 
