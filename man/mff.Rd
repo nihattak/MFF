@@ -12,7 +12,7 @@ mff(
   eta = 2,
   iter.max = 1000,
   nstart = 100,
-  method = c("fcm", "gk", "fkmgk", "pfcm", "kmeans")
+  method = c("fcm", "gk", "pfcm", "kmeans")
 )
 }
 \arguments{
@@ -31,79 +31,76 @@ the degree of fuzziness in FCM-type methods.}
 (\code{"pfcm"}) method. Controls the sharpness of probabilistic weights.}
 
 \item{method}{Character string specifying the membership generation method.
-One of \code{"fcm"}, \code{"gk"}, \code{"fkmgk"}, \code{"pfcm"}, or \code{"kmeans"}.}
+One of \code{"fcm"}, \code{"gk"}, \code{"pfcm"}, or \code{"kmeans"}.}
 }
 \value{
 A list containing:
 \describe{
 \item{method}{The clustering method used.}
-\item{standartized_membership}{Column-standardized membership matrix
-(\code{models × clusters}).}
+\item{weight_matrix}{Column-standardized membership matrix.}
 \item{cluster_preds}{Matrix of cluster predictions.}
 \item{cluster_scores}{Evaluation metrics for each cluster.}
 }
 }
 \description{
-\code{mff.gen()} serves as the core generator for the Meta-Fuzzy Fusion (MFF)
-framework. It supports five membership-building methods:
+\code{mff()} serves as the core generator for the Meta-Fuzzy Function (MFF)
+framework. It supports four membership-building methods:
 
 \itemize{
 \item \strong{"fcm"}: Classical Fuzzy C-Means (Euclidean, spherical clusters)
 \item \strong{"gk"}: Gustafson–Kessel Fuzzy Clustering (adaptive anisotropic shapes)
-\item \strong{"fkmgk"}: Hybrid Fuzzy K-Means with GK adaptation
 \item \strong{"pfcm"}: Probabilistic Fuzzy C-Means (softmax-like membership)
-\item \strong{"kmeans"}: Deterministic K-means converted to fuzzy memberships (MKF)
+\item \strong{"kmeans"}: Deterministic K-means converted to fuzzy memberships
 }
 
-All methods produce a membership matrix with dimensions
-\code{models × clusters}, fully compatible with \code{mff.predict()}, which then
+All methods produce a weight matrix with dimensions
+\code{models × clusters}, fully compatible with \code{predict()}, which then
 computes cluster-wise meta-predictions by linearly combining model predictions
-weighted by fuzzy memberships.
+weighted by crisp/fuzzy memberships.
 }
 \details{
 This function computes model-level fuzzy or probabilistic memberships using
 several meta-fuzzy clustering methods applied to the model prediction matrix \code{x}.
 Each base model is represented by its prediction vector across samples, and fuzzy
 memberships are estimated in this meta-prediction space. The resulting membership
-matrix is then used to produce cluster-wise meta-fusion predictions via
-\code{mff.predict()}, and cluster-level evaluation statistics are calculated.
+matrix is then used to produce cluster-wise predictions via
+\code{predict()}, and cluster-level evaluation statistics are calculated.
 
 The prediction matrix \code{x} is internally transposed so that each base model
 is treated as an individual observation in the meta-clustering procedure.
 Membership matrices are standardized column-wise using \code{prop.table()}
 to ensure that the total membership weight within each cluster sums to 1.
 
-After membership estimation, the function applies \code{mff.predict()} to construct
+After membership estimation, the function applies \code{predict()} to construct
 cluster-specific meta-predictions using:
 
-\deqn{ \hat{Y}_{cluster} = X \times U }
+\deqn{\mathrm{MFF}_{cluster} = w \times X}
 
 where:
 \itemize{
-\item \eqn{X}: model prediction matrix (\code{samples × models})
-\item \eqn{U}: fuzzy membership matrix (\code{models × clusters})
+\item \eqn{w}: weight matrix calculated by crisp/fuzzy memberships
+\item \eqn{X}: model prediction matrix
 }
 
 Cluster-wise performance metrics are computed using \code{evaluate()}.
 }
 \examples{
 \dontrun{
-# Generate fuzzy memberships and cluster predictions using Gustafson–Kessel
-result <- mff(x = pred_matrix, y = y_true, c = 3, method = "gk")
+ boston <- MASS::Boston
+ result_train <- model.train(
+    target = "medv",
+    df = boston,
+    test_count = 50,
+    valid_count = 50
+ )
 
-# Inspect membership weights
-result$standartized_membership
-
-# Cluster-level meta predictions
-result$cluster_preds
-
-# Performance per cluster
-result$cluster_scores
+ mff_model <- mff(result_train$pred_matrix_valid, result_train$y_valid, c = 4,
+ iter.max=100,nstart = 100,method = "kmeans")
+ mff_model
 }
-
 }
 \seealso{
-\code{mff.predict()} for cluster-wise meta-fusion,
-\code{cmeans()}, \code{gk()}, \code{FKM.gk()}, \code{pfcm()}, \code{kmeans()}
+\code{predict()} for cluster-wise prediction,
+\code{cmeans()}, \code{gk()}, \code{pfcm()}, \code{kmeans()}
 for membership generation algorithms.
 }

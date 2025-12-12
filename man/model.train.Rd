@@ -4,7 +4,7 @@
 \alias{model.train}
 \title{Train Multiple Regression and ML Models and Produce Model Predictions}
 \usage{
-model.train(target, df, test_count, valid_count)
+model.train(target, df, test_count, valid_count, seed = 123)
 }
 \arguments{
 \item{target}{Character string. Name of the target column to predict.}
@@ -14,6 +14,8 @@ model.train(target, df, test_count, valid_count)
 \item{test_count}{Integer. Number of observations to allocate to the test set.}
 
 \item{valid_count}{Integer. Number of observations to allocate to the validation set.}
+
+\item{seed}{Integer. Random number generator seed for reproducibility.}
 }
 \value{
 A list containing:
@@ -27,7 +29,7 @@ A list containing:
 \description{
 This function trains several machine learning models (LM, Lasso, Ridge,
 Elastic Net, Random Forest, XGBoost, LightGBM,and returns prediction matrices for validation and
-test sets. It is designed for stacking/ensemble meta-learning workflows.
+test sets. It is designed for ensemble meta-learning workflows.
 }
 \details{
 The function randomly splits the dataframe into training, validation, and
@@ -54,14 +56,16 @@ Validation and test predictions are combined into matrices used for stacking:
 }
 \examples{
 \dontrun{
+ boston <- MASS::Boston
   result <- model.train(
-    target = "SalePrice",
-    df = housing_df,
-    test_count = 300,
-    valid_count = 300
+    target = "medv",
+    df = boston,
+    test_count = 50,
+    valid_count = 50
   )
 
   head(result$pred_matrix_valid)
+  head(result$pred_matrix_test)
 }
 
 }

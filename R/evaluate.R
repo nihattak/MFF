@@ -1,33 +1,28 @@
 #' Compute Error Metrics for Predicted Values
 #'
-#' This function calculates standard prediction error metrics for either a single
-#' predicted vector or multiple prediction columns supplied as a matrix. The
-#' metrics computed are Mean Absolute Error (MAE), Root Mean Square Error (RMSE),
-#' and Mean Absolute Percentage Error (MAPE).
+#' Computes multiple regression error metrics for predicted values by comparing
+#' them to the true target values.
 #'
 #' @description
 #' \code{evaluate()} supports two input formats:
 #' \itemize{
-#'   \item A numeric vector of predicted values
-#'   \item A matrix of predicted values, where each column represents a model or
-#'         cluster-based prediction
+#'   \item A numeric vector of predicted values.
+#'   \item A numeric matrix where each column represents the predictions from
+#'         a different model or cluster.
 #' }
 #'
 #' For vector input, the function returns a single-row data frame.
 #' For matrix input, metrics are computed column-wise and returned as a
 #' multi-row data frame.
 #'
-#' @param preds A numeric vector or numeric matrix containing predicted values.
+#' @param y_pred Numeric vector or numeric matrix of predicted values.
 #'        If a matrix is provided, each column is evaluated separately.
 #'
-#' @param y_true A numeric vector of true target values corresponding to the rows
-#'        of \code{preds}.
-#'
-#' @param model_name Character string specifying the model name when evaluating
-#'        a single prediction vector. Ignored when \code{preds} is a matrix.
+#' @param y_true Numeric vector of true target values corresponding to
+#'        the rows of \code{preds}.
 #'
 #' @details
-#' The function computes the following metrics:
+#' The following performance metrics are computed:
 #'
 #' \strong{Mean Absolute Error (MAE):}
 #' \deqn{ MAE = mean(|\hat{y} - y|) }
@@ -36,32 +31,44 @@
 #' \deqn{ RMSE = \sqrt{mean((\hat{y} - y)^2)} }
 #'
 #' \strong{Mean Absolute Percentage Error (MAPE):}
-#' \deqn{ MAPE = mean(|(\hat{y} - y) / (y + \varepsilon)|) \times 100 }
+#' \deqn{ MAPE = mean(|(\hat{y} - y)/(y + \varepsilon)|) \times 100 }
 #'
-#' A small constant \eqn{\varepsilon = 1e-8} is added to avoid division by zero.
+#' \strong{Symmetric Mean Absolute Percentage Error (SMAPE):}
+#' \deqn{ SMAPE = mean\left(\frac{2|\hat{y} - y|}{|\hat{y}| + |y| + \varepsilon}\right) \times 100 }
 #'
-#' When \code{preds} is a matrix, missing or empty column names are automatically
-#' replaced with default names such as \code{"Model_1"}, \code{"Model_2"}, etc.
+#' \strong{Mean Squared Error (MSE):}
+#' \deqn{ MSE = mean((\hat{y} - y)^2) }
 #'
-#' @return A data frame containing:
+#' \strong{Median Absolute Error (MedAE):}
+#' \deqn{ MedAE = median(|\hat{y} - y|) }
+#'
+#' A small constant \eqn{\varepsilon = 1e-8} is added to avoid division by zero
+#' for percentage-based metrics.
+#'
+#' @return A data frame with the following columns:
 #' \describe{
-#'   \item{Model}{Model or prediction label.}
-#'   \item{MAE}{Mean Absolute Error.}
-#'   \item{RMSE}{Root Mean Square Error.}
-#'   \item{MAPE}{Mean Absolute Percentage Error.}
+#'   \item{Model}{Prediction label}
+#'   \item{MAE}{Mean Absolute Error}
+#'   \item{RMSE}{Root Mean Square Error}
+#'   \item{MAPE}{Mean Absolute Percentage Error}
+#'   \item{SMAPE}{Symmetric Mean Absolute Percentage Error}
+#'   \item{MSE}{Mean Squared Error}
+#'   \item{MedAE}{Median Absolute Error}
 #' }
 #'
 #' @examples
 #' \dontrun{
-#' # Vector input
-#' evaluate(preds = y_pred, y_true = y)
-#'
-#' # Matrix input
-#' evaluate(preds = pred_matrix, y_true = y)
+#'   boston <- MASS::Boston
+#'   results <- model.train(
+#'     target = "medv",
+#'     df = boston,
+#'     test_count = 50,
+#'     valid_count = 50
+#'   )
+#'   evaluate(results$pred_matrix_valid,results$y_valid)
 #' }
-#'
 #' @export
-evaluate <- function(preds, y_true, model_name = "Individual") {
+evaluate <- function(y_pred, y_true) {
 
   compute_metrics <- function(p, y) {
     errors <- p - y
@@ -83,33 +90,12 @@ evaluate <- function(preds, y_true, model_name = "Individual") {
     ))
   }
 
-  if (!is.matrix(preds)) {
-    m <- compute_metrics(preds, y_true)
-    df <- data.frame(
-      Model = model_name,
-      t(m),
-      row.names = NULL
-    )
-    return(df)
+  if (!is.matrix(y_pred)) {
+    m <- compute_metrics(y_pred, y_true)
+    return(t(m))
   }
 
-  model_names <- colnames(preds)
-  if (is.null(model_names)) {
-    model_names <- paste0("Model_", seq_len(ncol(preds)))
-  } else {
-    empty <- (model_names == "" | is.na(model_names))
-    if (any(empty)) {
-      model_names[empty] <- paste0("Model_", which(empty))
-    }
-  }
+  results <- t(apply(y_pred, 2, function(p) compute_metrics(p, y_true)))
 
-  results <- t(apply(preds, 2, function(p) compute_metrics(p, y_true)))
-
-  df <- data.frame(
-    Model = model_names,
-    results,
-    row.names = NULL
-  )
-
-  return(df)
+  return(results)
 }

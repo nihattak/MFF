@@ -2,7 +2,7 @@
 #'
 #' This function trains several machine learning models (LM, Lasso, Ridge,
 #' Elastic Net, Random Forest, XGBoost, LightGBM,and returns prediction matrices for validation and
-#' test sets. It is designed for stacking/ensemble meta-learning workflows.
+#' test sets. It is designed for ensemble meta-learning workflows.
 #'
 #' The function randomly splits the dataframe into training, validation, and
 #' test sets based on given sample sizes. Each model is trained on the training
@@ -13,6 +13,7 @@
 #' @param df A data frame containing the predictors and the target variable.
 #' @param test_count Integer. Number of observations to allocate to the test set.
 #' @param valid_count Integer. Number of observations to allocate to the validation set.
+#' @param seed Integer. Random number generator seed for reproducibility.
 #'
 #' @details
 #' **Models trained**
@@ -43,26 +44,29 @@
 #'
 #' @examples
 #' \dontrun{
+#'  boston <- MASS::Boston
 #'   result <- model.train(
-#'     target = "SalePrice",
-#'     df = housing_df,
-#'     test_count = 300,
-#'     valid_count = 300
+#'     target = "medv",
+#'     df = boston,
+#'     test_count = 50,
+#'     valid_count = 50
 #'   )
 #'
 #'   head(result$pred_matrix_valid)
+#'   head(result$pred_matrix_test)
 #' }
 #'
-#' @import glmnet
-#' @import randomForest
-#' @import xgboost
-#' @import lightgbm
+#' @importFrom glmnet cv.glmnet glmnet
+#' @importFrom randomForest randomForest
+#' @importFrom xgboost xgb.train xgb.DMatrix
+#' @importFrom lightgbm lgb.train lgb.Dataset
+#' @importFrom stats lm predict model.matrix as.formula
 #'
 #' @export
-model.train <- function(target,df,test_count,valid_count) {
+model.train <- function(target,df,test_count,valid_count,seed = 123) {
 n <- nrow(df)
 
-set.seed(123)
+set.seed(seed)
 
 # Validation set
 valid_index <- sample(seq_len(n), size = valid_count)
@@ -99,21 +103,25 @@ X_test <- model.matrix(formula, test_data)[, -1]
 y_test <- as.matrix(test_data[target])
 
 # Lasso
+set.seed(seed)
 cv_model_lasso <- cv.glmnet(X_train, y_train, alpha = 1, nfolds = 10)
 lasso_pred_valid <- predict(cv_model_lasso,s = "lambda.min" ,X_valid)
 lasso_pred_test <- predict(cv_model_lasso,s = "lambda.min" ,X_test)
 
 # Ridge
-cv_model_ridge <- cv.glmnet(X_train, y_train, alpha = 1, nfolds = 10)
+set.seed(seed)
+cv_model_ridge <- cv.glmnet(X_train, y_train, alpha = 0, nfolds = 10)
 ridge_pred_valid <- predict(cv_model_ridge,s = "lambda.min" ,X_valid)
 ridge_pred_test <- predict(cv_model_ridge,s = "lambda.min" ,X_test)
 
 # Elastic Net
-cv_model_elastic <- cv.glmnet(X_train, y_train, alpha = 1, nfolds = 10)
+set.seed(seed)
+cv_model_elastic <- cv.glmnet(X_train, y_train, alpha = 0.5, nfolds = 10)
 elastic_pred_valid <- predict(cv_model_elastic,s = "lambda.min" ,X_valid)
 elastic_pred_test <- predict(cv_model_elastic,s = "lambda.min" ,X_test)
 
 # Random Forest (RF)
+set.seed(seed)
 rf_model <- randomForest(formula, data = train_data, ntree = 100)
 rf_pred_valid <- predict(rf_model,valid_data)
 rf_pred_test <- predict(rf_model,test_data)
@@ -125,6 +133,7 @@ max_depth = 6
 
 xgboost_dtrain <- xgb.DMatrix(X_train, label = y_train)
 xgboost_params <- list(objective = "reg:squarederror", eta = eta, max_depth = max_depth, eval_metric = "rmse")
+set.seed(seed)
 xgboost_model <- xgb.train(xgboost_params, xgboost_dtrain, nrounds = nrounds, verbose = 0)
 xgboost_pred_valid <- predict(xgboost_model, xgb.DMatrix(X_valid))
 xgboost_pred_test <- predict(xgboost_model, xgb.DMatrix(X_test))
@@ -134,7 +143,7 @@ learning_rate = 0.05
 num_leaves = 31
 
 lightgbm_dtrain <- lgb.Dataset(X_train, label = y_train)
-lightgbm_params <- list(objective = "regression", metric = "rmse", learning_rate = learning_rate, num_leaves = num_leaves, verbose = -1)
+lightgbm_params <- list(objective = "regression", metric = "rmse", learning_rate = learning_rate, num_leaves = num_leaves, verbose = -1 ,seed = seed, force_row_wise = TRUE)
 lightgbm_model <- lgb.train(lightgbm_params, lightgbm_dtrain, nrounds = nrounds, verbose = -1)
 lightgbm_pred_valid <- predict(lightgbm_model, X_valid)
 lightgbm_pred_test <- predict(lightgbm_model, X_test)

@@ -1,21 +1,28 @@
 Package: MFF
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Meta Fuzzy Functions
 Version: 0.1.0
 Authors@R: c(
     person(
-      "Jane", "Doe",
-      email = "jane@example.com",
+      "Nihat", "Tak",
+      email = "nihattak@gmail.com",
       role = c("aut", "cre")
     )
   )
-Description: More about what it does (maybe more than one line).
-    Continuation lines should be indented.
-License: What license is it under?
+Description: Ensembles various models via fuzzy clustering methods.
+License: MIT
 Encoding: UTF-8
-LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
+Imports:
+    MASS,
+    glmnet,
+    randomForest,
+    xgboost,
+    lightgbm,
+    e1071,
+    ppclust,
+    fclust
 Suggests: 
     knitr,
     rmarkdown

@@ -4,25 +4,24 @@
 #' several meta-fuzzy clustering methods applied to the model prediction matrix \code{x}.
 #' Each base model is represented by its prediction vector across samples, and fuzzy
 #' memberships are estimated in this meta-prediction space. The resulting membership
-#' matrix is then used to produce cluster-wise meta-fusion predictions via
-#' \code{mff.predict()}, and cluster-level evaluation statistics are calculated.
+#' matrix is then used to produce cluster-wise predictions via
+#' \code{predict()}, and cluster-level evaluation statistics are calculated.
 #'
 #' @description
-#' \code{mff.gen()} serves as the core generator for the Meta-Fuzzy Fusion (MFF)
-#' framework. It supports five membership-building methods:
+#' \code{mff()} serves as the core generator for the Meta-Fuzzy Function (MFF)
+#' framework. It supports four membership-building methods:
 #'
 #' \itemize{
 #'   \item \strong{"fcm"}: Classical Fuzzy C-Means (Euclidean, spherical clusters)
 #'   \item \strong{"gk"}: Gustafson–Kessel Fuzzy Clustering (adaptive anisotropic shapes)
-#'   \item \strong{"fkmgk"}: Hybrid Fuzzy K-Means with GK adaptation
 #'   \item \strong{"pfcm"}: Probabilistic Fuzzy C-Means (softmax-like membership)
-#'   \item \strong{"kmeans"}: Deterministic K-means converted to fuzzy memberships (MKF)
+#'   \item \strong{"kmeans"}: Deterministic K-means converted to fuzzy memberships
 #' }
 #'
-#' All methods produce a membership matrix with dimensions
-#' \code{models × clusters}, fully compatible with \code{mff.predict()}, which then
+#' All methods produce a weight matrix with dimensions
+#' \code{models × clusters}, fully compatible with \code{predict()}, which then
 #' computes cluster-wise meta-predictions by linearly combining model predictions
-#' weighted by fuzzy memberships.
+#' weighted by crisp/fuzzy memberships.
 #'
 #' @param x A numeric matrix of model predictions with dimensions
 #'        \code{samples × models}. Each column represents a base learner.
@@ -39,7 +38,7 @@
 #'        (\code{"pfcm"}) method. Controls the sharpness of probabilistic weights.
 #'
 #' @param method Character string specifying the membership generation method.
-#'        One of \code{"fcm"}, \code{"gk"}, \code{"fkmgk"}, \code{"pfcm"}, or \code{"kmeans"}.
+#'        One of \code{"fcm"}, \code{"gk"}, \code{"pfcm"}, or \code{"kmeans"}.
 #'
 #' @details
 #' The prediction matrix \code{x} is internally transposed so that each base model
@@ -47,15 +46,15 @@
 #' Membership matrices are standardized column-wise using \code{prop.table()}
 #' to ensure that the total membership weight within each cluster sums to 1.
 #'
-#' After membership estimation, the function applies \code{mff.predict()} to construct
+#' After membership estimation, the function applies \code{predict()} to construct
 #' cluster-specific meta-predictions using:
 #'
-#' \deqn{ \hat{Y}_{cluster} = X \times U }
+#' \deqn{\mathrm{MFF}_{cluster} = w \times X}
 #'
 #' where:
 #' \itemize{
-#'   \item \eqn{X}: model prediction matrix (\code{samples × models})
-#'   \item \eqn{U}: fuzzy membership matrix (\code{models × clusters})
+#'   \item \eqn{w}: weight matrix calculated by crisp/fuzzy memberships
+#'   \item \eqn{X}: model prediction matrix
 #' }
 #'
 #' Cluster-wise performance metrics are computed using \code{evaluate()}.
@@ -63,38 +62,35 @@
 #' @return A list containing:
 #' \describe{
 #'   \item{method}{The clustering method used.}
-#'   \item{standartized_membership}{Column-standardized membership matrix
-#'         (\code{models × clusters}).}
+#'   \item{weight_matrix}{Column-standardized membership matrix.}
 #'   \item{cluster_preds}{Matrix of cluster predictions.}
 #'   \item{cluster_scores}{Evaluation metrics for each cluster.}
 #' }
 #'
 #' @seealso
-#' \code{mff.predict()} for cluster-wise meta-fusion,
-#' \code{cmeans()}, \code{gk()}, \code{FKM.gk()}, \code{pfcm()}, \code{kmeans()}
+#' \code{predict()} for cluster-wise prediction,
+#' \code{cmeans()}, \code{gk()}, \code{pfcm()}, \code{kmeans()}
 #' for membership generation algorithms.
 #'
 #' @examples
 #' \dontrun{
-#' # Generate fuzzy memberships and cluster predictions using Gustafson–Kessel
-#' result <- mff(x = pred_matrix, y = y_true, c = 3, method = "gk")
+#'  boston <- MASS::Boston
+#'  result_train <- model.train(
+#'     target = "medv",
+#'     df = boston,
+#'     test_count = 50,
+#'     valid_count = 50
+#'  )
 #'
-#' # Inspect membership weights
-#' result$standartized_membership
-#'
-#' # Cluster-level meta predictions
-#' result$cluster_preds
-#'
-#' # Performance per cluster
-#' result$cluster_scores
-#' }
-#'
+#'  mff_model <- mff(result_train$pred_matrix_valid, result_train$y_valid, c = 4,
+#'  iter.max=100,nstart = 100,method = "kmeans")
+#'  mff_model
+#'}
 #' @importFrom e1071 cmeans
 #' @importFrom ppclust gk pfcm
-#' @importFrom fclust FKM.gk
 #'
 #' @export
-mff <- function(x, y, c = 3, m = 2, eta = 2,iter.max=1000,nstart = 100,method = c("fcm", "gk","fkmgk", "pfcm", "kmeans")) {
+mff <- function(x, y, c = 3, m = 2, eta = 2,iter.max=1000,nstart = 100,method = c("fcm", "gk", "pfcm", "kmeans")) {
   method <- match.arg(method)
 
   if (method == "fcm") {
@@ -105,11 +101,7 @@ mff <- function(x, y, c = 3, m = 2, eta = 2,iter.max=1000,nstart = 100,method = 
     result <- gk(t(x), centers = c, m = m,stand = T,iter.max=iter.max)
     membership <- result$u
 
-  } else if (method == "fkmgk") {
-    result <- FKM.gk(t(x), k = c, m = m,RS = 100,stand = T,maxit=iter.max)
-    membership <- result$U
-
-  }else if (method == "pfcm") {
+  } else if (method == "pfcm") {
     result <- pfcm(t(x), centers = c, m = m, eta = eta,stand = T,iter.max=iter.max)
     membership <- result$u
 
@@ -120,23 +112,19 @@ mff <- function(x, y, c = 3, m = 2, eta = 2,iter.max=1000,nstart = 100,method = 
     stop("Unknown method.")
   }
 
-  standartized_membership <- prop.table(membership, margin = 2)
-  rownames(standartized_membership) <- colnames(x)
+  weight_matrix <- prop.table(membership, margin = 2)
+  rownames(weight_matrix) <- colnames(x)
 
-  standartized_membership <- structure(
-    standartized_membership,
-    class = c("mff", class(standartized_membership))
-  )
-
-  cluster_preds <- predict(standartized_membership,x)
-  cluster_scores <- evaluate(cluster_preds$preds, y)
+  cluster_preds <- x %*% weight_matrix
+  cluster_scores <- evaluate(cluster_preds, y)
 
   out <- list(
     method = method,
-    standartized_membership = standartized_membership,
-    cluster_preds = cluster_preds$preds,
+    weight_matrix = weight_matrix,
     cluster_scores = cluster_scores
   )
+
+  out <- structure(out, class = "mff")
 
   return(out)
 }

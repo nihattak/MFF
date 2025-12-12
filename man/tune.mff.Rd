@@ -2,19 +2,19 @@
 % Please edit documentation in R/tune.mff.R
 \name{tune.mff}
 \alias{tune.mff}
-\title{Hyperparameter Search for Meta-Fuzzy Methods}
+\title{Hyperparameter Search for Meta-Fuzzy Function}
 \usage{
 tune.mff(
   pred_matrix,
-  y_valid,
+  y,
   max_c = 5,
-  max_m = seq(1.1, 3, by = 0.1),
-  max_eta = seq(1.1, 3, by = 0.4),
+  m_seq = seq(1.1, 3, by = 0.1),
+  eta_seq = seq(1.1, 3, by = 0.4),
   iter.max = 1000,
   nstart = 100,
   seed = 123,
-  mff.method = c("fcm", "gk", "fkmgk", "pfcm", "kmeans"),
-  eval.method = c("MAE", "RMSE", "MAPE"),
+  mff.method = c("fcm", "gk", "pfcm", "kmeans"),
+  eval.method = c("MAE", "RMSE", "MAPE", "SMAPE", "MSE", "MedAE"),
   logging = T
 )
 }
@@ -22,26 +22,25 @@ tune.mff(
 \item{pred_matrix}{A numeric matrix containing model predictions, where rows
 represent observations and columns represent base models.}
 
-\item{y_valid}{A numeric vector of true validation values used to evaluate
+\item{y}{A numeric vector of true validation values used to evaluate
 cluster-based predicted outputs.}
 
-\item{max_c}{Integer. Maximum number of clusters to search up to.
-The search spans \code{c = 2:max_c}.}
+\item{max_c}{Integer. Maximum number of clusters to search up to.}
 
-\item{max_m}{Numeric. Maximum value of the fuzzy exponent parameter \code{m}
-to explore during the search.}
+\item{m_seq}{Numeric vector. Search values for the fuzziness index parameter \code{m}.}
 
-\item{max_eta}{Numeric. Maximum value of the probabilistic parameter
+\item{eta_seq}{Numeric vector. Search values for the possibilistic parameter
 \code{eta} searched when \code{mff.method = "pfcm"}.}
 
-\item{seed}{Integer. Seed for reproducibility during membership computation.}
+\item{seed}{Integer. Seed for reproducibility during weight computation.}
 
-\item{mff.method}{Character string specifying the meta-fuzzy method.
-One of \code{"fcm"}, \code{"gk"}, \code{"fkmgk"}, \code{"pfcm"},
+\item{mff.method}{Character string specifying the meta-fuzzy functions.
+One of \code{"fcm"}, \code{"gk"}, \code{"pfcm"},
 or \code{"kmeans"}.}
 
 \item{eval.method}{Character string specifying the metric used to select the
-best configuration. One of \code{"MAE"}, \code{"RMSE"}, or \code{"MAPE"}.}
+best configuration. One of \code{MAE}, \code{RMSE},
+\code{MAPE},\code{SMAPE},\code{MSE} or \code{MedAE}.}
 
 \item{logging}{Logical. If \code{TRUE}, prints progress information during the
 search.}
@@ -49,70 +48,67 @@ search.}
 \value{
 A list containing:
 \describe{
-\item{algo}{Selected meta-fuzzy method.}
+\item{algorithm}{Selected clustering method.}
 \item{eval.method}{Evaluation metric used in the search.}
-\item{memberships}{Membership matrix associated with the best configuration.}
-\item{memberships_rounded}{Rounded membership matrix.}
-\item{best_method}{Best (minimum) metric value observed.}
+\item{weights}{Weight matrix associated with the best configuration.}
 \item{best_params}{List of hyperparameters that obtained the best score.}
 \item{best_cluster}{Index of the cluster giving the lowest error.}
-\item{best_weight}{Membership vector for the best-performing cluster.}
+\item{best_weight}{Weight vector for the best-performing cluster.}
 \item{best_scores}{Full evaluation scores for all clusters under the best configuration.}
 }
 }
 \description{
-\code{mff.search()} iterates over a predefined grid of parameter combinations
+\code{tune.mff()} iterates over a predefined grid of parameter combinations
 to identify the configuration that yields the lowest validation error.
-Memberships are generated using \code{mff.gen()}, and cluster-based predicted
-values are evaluated using the provided metric (\code{MAE}, \code{RMSE}, or
-\code{MAPE}).
+Weights are generated using \code{mff()}, and cluster-based predicted
+values are evaluated using the provided metric (\code{MAE}, \code{RMSE},
+\code{MAPE},\code{SMAPE},\code{MSE} or \code{MedAE}).
 
 The search spans different parameter spaces depending on the selected method:
 \itemize{
 \item \strong{FCM}: searches over \code{m} and \code{c}.
-\item \strong{GK / FKMGK}: searches over \code{m} and \code{c} with coarser steps.
+\item \strong{GK}: searches over \code{m} and \code{c} with coarser steps.
 \item \strong{PFCM}: searches over \code{m}, \code{c}, and \code{eta}.
 \item \strong{K-means (MKF)}: searches only over \code{c}.
 }
 }
 \details{
-This function performs a structured search over hyperparameters used in
-meta-fuzzy membership generation. For a given model prediction matrix and
+This function performs a structured search over hyperparameters used to obtain
+the best meta fuzzy functions. For a given model prediction matrix and
 validation target vector, it evaluates multiple configurations of
-\code{m}, \code{c}, and \code{eta} depending on the selected meta-fuzzy
+\code{m}, \code{c}, and \code{eta} depending on the selected clustering
 method. The function returns the best-performing configuration according
 to the specified evaluation metric.
 
-For each parameter combination in the search grid, \code{mff.gen()} is
-executed to compute memberships, cluster-based predictions, and evaluation
+For each parameter combination in the search grid, \code{mff()} is
+executed to compute weights, cluster-based predictions, and evaluation
 statistics. The best configuration is determined by the minimum value among
 the cluster-specific scores for the selected evaluation metric.
 
 The output also includes:
 \itemize{
 \item The best cluster index (cluster yielding minimum error)
-\item The membership weights corresponding to the best cluster
-\item Rounded membership matrix for interpretability
+\item The weights corresponding to the best cluster
 \item The set of hyperparameters that achieved the best score
 }
 }
 \examples{
 \dontrun{
-result <- tune.mff(
-  pred_matrix = X_valid,
-  y_valid = y_valid,
-  max_c = 5,
-  max_m = 3,
-  mff.method = "gk",
-  eval.method = "RMSE"
-)
+ boston <- MASS::Boston
+ result_train <- model.train(
+    target = "medv",
+    df = boston,
+    test_count = 50,
+    valid_count = 50
+ )
 
-result$best_params       # best m and c
-result$best_cluster      # best performing cluster
-result$memberships       # membership matrix
+ cluster_res <- tune.mff(result_train$pred_matrix_valid, result_train$y_valid,
+ max_c = 6, iter.max=100,nstart = 100,mff.method = "kmeans")
+
+ cluster_res
 }
 
 }
 \seealso{
-\code{mff.gen()} for generating memberships and cluster-based predictions.
+\code{mff} for generating weight and cluster-based predictions.
 }
