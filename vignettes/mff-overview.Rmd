@@ -17,3 +17,141 @@ knitr::opts_chunk$set(
 ```{r setup}
 library(MFF)
 ```
+
+## Introduction
+
+The **MFF (Meta Fuzzy Functions)** package provides a flexible framework for combining multiple base prediction models using fuzzy and crisp clustering strategies. The main idea is to construct **cluster-specific ensembles** where each cluster learns its own set of weights for aggregating model predictions.
+
+This approach is particularly useful when different data regimes or latent structures favor different predictive models.
+
+------------------------------------------------------------------------
+
+## Core Concepts
+
+Let $X \in \mathbb{R}^{n \times M}$ denote the prediction matrix of $M$ base models for $n$ observations.\
+MFF assigns **cluster-specific weight vectors** to aggregate these predictions.
+
+For a given cluster $k$, the predicted values are obtained as:
+
+$$
+\mathrm{MFF}_{cluster} = w \times X
+$$
+
+where $w_k$ is the weight vector associated with cluster $k$.
+
+------------------------------------------------------------------------
+
+## Training Base Models
+
+Before applying MFF, base models must be trained and their predictions collected into a prediction matrix.
+
+The helper function `model.train()` provides a convenient way to train multiple models and extract their prediction matrices.
+
+```{r}
+data <- MASS::Boston
+
+result <- model.train(
+  target = "medv",
+  df = data,
+  test_count = 50,
+  valid_count = 50
+)
+
+str(result$pred_matrix_valid)
+```
+
+The resulting prediction matrix has one column per base model and one row per observation.
+
+------------------------------------------------------------------------
+
+## Fitting an MFF Model
+
+### Standard MFF
+
+A standard MFF model learns a **single set of weights** (or cluster-specific weights if clustering is applied).
+
+```{r}
+mff_model <- mff(x = result$pred_matrix_valid,
+y = result$y_valid, c = 6, m = 3)
+mff_model
+```
+
+------------------------------------------------------------------------
+
+### Tuned MFF
+
+The `tune.mff()` function evaluates multiple MFF configurations and selects the best-performing model according to a chosen metric.
+
+```{r}
+mff_tuned <- tune.mff(x = result$pred_matrix_valid,
+y = result$y_valid, max_c = 6, iter.max = 100, nstart = 100, mff.method = "fcm")
+mff_tuned
+```
+
+------------------------------------------------------------------------
+
+## Prediction
+
+Prediction is performed using the generic `predict()` function. The same interface applies to both standard and tuned MFF models.
+
+```{r}
+X_test <- result$pred_matrix_test
+out <- predict(mff_tuned, X_test)
+```
+
+By default, the **best-performing MFF model** is used when available. If the model is not tuned, predictions are generated using the learned weights.
+
+The returned object contains:
+
+-   `mff_preds`: cluster-specific predictions
+-   `mff_weights`: corresponding weight matrix (rounded for readability)
+
+```{r}
+head(out$mff_preds)
+out$mff_weights
+```
+
+------------------------------------------------------------------------
+
+## Prediction Modes
+
+The `type` argument controls the prediction mode:
+
+-   `"best"` (default): uses the optimal MFF model if available
+-   `"all"`: returns predictions based on all learned cluster configurations
+
+```{r}
+out_all <- predict(mff_tuned, X_test, type = "all")
+out_all$mff_weights
+```
+
+------------------------------------------------------------------------
+
+## Model Evaluation
+
+The `evaluate()` function measures prediction accuracy by comparing model outputs with the observed target values.
+
+It requires two main arguments:
+
+-   `y_pred`: the predicted values obtained from an MFF model
+-   `y_true`: the true observed response values
+
+The function returns standard performance metrics that summarize the predictive quality of the model.
+
+```{r}
+evaluate(
+  y_pred = out$mff_preds,
+  y_true = result$y_test
+)
+```
+
+## Summary
+
+The MFF framework enables flexible and interpretable ensemble learning by:
+
+-   combining multiple base models,
+-   leveraging fuzzy or crisp clustering,
+-   producing cluster-specific predictions,
+-   and offering a unified prediction interface.
+
+This design allows users to seamlessly switch between standard and tuned meta-fuzzy models without changing the prediction workflow.

@@ -1,4 +1,4 @@
-#' Generate Membership-Weighted Cluster Predictions
+#' Predict method for mff objects
 #'
 #' This function produces cluster-specific predicted values by combining the
 #' model prediction matrix with a fuzzy membership matrix. Each resulting
@@ -20,12 +20,15 @@
 #' to its membership degree. Membership matrices usually originate from
 #' meta-fuzzy methods such as FCM, GK,or PFCM.
 #'
-#' @param object A trained model (MFF).
+#' @param object An object of class \code{mff}.
+#' @param pred_matrix Matrix of base model predictions.
+#' @param type Character string specifying the prediction mode. Option for MFF tune function \code{tune.mff()}.
 #'
-#' @param pred_matrix A numeric matrix containing predictions from multiple
-#'        models. Rows correspond to observations and columns correspond
-#'        to the individual base models.
-#' @param cluster A number to select specific cluster to predict.
+#'   \code{"best"} returns predictions from the MFF model that achieved the
+#'   optimal value according to the training metric (e.g., RMSE, MAE).
+#'
+#'   \code{"all"} returns a matrix or list of predictions from every MFF model
+#'   generated during the tuning process.
 #' @param ... Not used.
 #'
 #' @details
@@ -42,7 +45,6 @@
 #'
 #' @examples
 #' \dontrun{
-#' # X: model prediction matrix
 #'  boston <- MASS::Boston
 #'  result_train <- model.train(
 #'     target = "medv",
@@ -51,54 +53,41 @@
 #'     valid_count = 50
 #'  )
 #'
-#'  mff_model <- mff(result_train$pred_matrix_valid, result_train$y_valid, c = 4,
-#'  iter.max=100,nstart = 100,method = "kmeans")
+#'  mff_tune_model <- tune.mff(result_train$pred_matrix_valid, result_train$y_valid, max_c = 6,
+#'  iter.max=100,nstart = 100,mff.method = "kmeans")
 #'  X <- result_train$pred_matrix_test
-#'  out <- predict(mff_model, X)
+#'  out <- predict(mff_tune_model, X)
 #'
-#' head(out$mff_preds)   # cluster-based outputs
-#' out$mff_weights       # rounded weights
+#' head(out$mff_preds)
+#' out$mff_weights
 #'
 #' }
 #'
-#' @seealso
-#' \code{mff()} for generating membership matrices using meta-fuzzy methods.
-#'
-#' @noRd
 #' @export
 predict.mff <- function(object,
-                        pred_matrix,
-                        cluster = NULL,
-                        ...) {
+                             pred_matrix,
+                             type = c("best", "all"),
+                             ...) {
 
-  memberships <- object$weight_matrix
-  preds <- pred_matrix %*% memberships
-  k <- ncol(preds)
+  type <- match.arg(type)
 
-  # --- No cluster specified -> return ALL ---------------------------
-  if (is.null(cluster)) {
-    return(list(
-      mff_preds = preds,
-      mff_weights = round(memberships, 4)
-    ))
+  if (type == "best") {
+
+    weights <- if (!is.null(object$best_weight)) {
+      object$best_weight
+    } else {
+      object$weights
+    }
+
+  } else {
+    weights <- object$weights
   }
 
-  # --- Validation ---------------------------------------------------
-  if (!is.numeric(cluster) || any(cluster %% 1 != 0)) {
-    stop("`cluster` must be integer index(es).")
-  }
+  preds <- pred_matrix %*% weights
 
-  if (any(cluster < 1 | cluster > k)) {
-    stop("`cluster` index out of bounds. Must be between 1 and ", k, ".")
-  }
-
-  # --- Return selected cluster(s) -----------------------------------
-  selected_preds <- preds[, cluster, drop = FALSE]
-  selected_weights <- memberships[, cluster, drop = FALSE]
-
-  return(list(
-    mff_preds = selected_preds,
-    mff_weights = round(selected_weights, 4)
-  ))
+  list(
+    mff_preds   = preds,
+    mff_weights = round(weights, 4)
+  )
 }
 

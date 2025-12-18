@@ -7,7 +7,7 @@
 #' The function randomly splits the dataframe into training, validation, and
 #' test sets based on given sample sizes. Each model is trained on the training
 #' set, and predictions are generated for validation and test sets. These
-#' predictions form the model prediction meta-features for stacking models.
+#' predictions form the model prediction meta-fuzzy functions.
 #'
 #' @param target Character string. Name of the target column to predict.
 #' @param df A data frame containing the predictors and the target variable.
@@ -27,7 +27,7 @@
 #'   \item LightGBM (regression objective)
 #' }
 #'
-#' Validation and test predictions are combined into matrices used for stacking:
+#' Validation and test predictions are returned for meta fuzzy functions:
 #' \itemize{
 #'   \item \code{pred_matrix_valid}: Validation predictions
 #'   \item \code{pred_matrix_test}: Test predictions

@@ -66,6 +66,9 @@
 #'   )
 #'   evaluate(results$pred_matrix_valid,results$y_valid)
 #' }
+#'
+#' @importFrom stats median
+#'
 #' @export
 evaluate <- function(y_pred, y_true) {
 

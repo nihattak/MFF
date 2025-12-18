@@ -5,7 +5,7 @@
 \title{Hyperparameter Search for Meta-Fuzzy Function}
 \usage{
 tune.mff(
-  pred_matrix,
+  x,
   y,
   max_c = 5,
   m_seq = seq(1.1, 3, by = 0.1),
@@ -19,7 +19,7 @@ tune.mff(
 )
 }
 \arguments{
-\item{pred_matrix}{A numeric matrix containing model predictions, where rows
+\item{x}{A numeric matrix containing model predictions, where rows
 represent observations and columns represent base models.}
 
 \item{y}{A numeric vector of true validation values used to evaluate
@@ -31,6 +31,10 @@ cluster-based predicted outputs.}
 
 \item{eta_seq}{Numeric vector. Search values for the possibilistic parameter
 \code{eta} searched when \code{mff.method = "pfcm"}.}
+
+\item{iter.max}{Integer. The maximum number of iterations allowed.}
+
+\item{nstart}{Integer. K-means only. If \code{centers} is a number, how many random sets should be chosen.}
 
 \item{seed}{Integer. Seed for reproducibility during weight computation.}
 

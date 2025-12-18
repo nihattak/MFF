@@ -10,20 +10,19 @@ Authors@R: c(
     )
   )
 Description: Ensembles various models via fuzzy clustering methods.
-License: MIT
+License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
 Imports:
-    MASS,
     glmnet,
     randomForest,
     xgboost,
     lightgbm,
     e1071,
-    ppclust,
-    fclust
+    ppclust
 Suggests: 
     knitr,
-    rmarkdown
+    rmarkdown,
+    MASS
 VignetteBuilder: knitr

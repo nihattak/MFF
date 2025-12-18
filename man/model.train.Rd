@@ -35,7 +35,7 @@ test sets. It is designed for ensemble meta-learning workflows.
 The function randomly splits the dataframe into training, validation, and
 test sets based on given sample sizes. Each model is trained on the training
 set, and predictions are generated for validation and test sets. These
-predictions form the model prediction meta-features for stacking models.
+predictions form the model prediction meta-fuzzy functions.
 
 \strong{Models trained}
 \itemize{
@@ -48,7 +48,7 @@ predictions form the model prediction meta-features for stacking models.
 \item LightGBM (regression objective)
 }
 
-Validation and test predictions are combined into matrices used for stacking:
+Validation and test predictions are returned for meta fuzzy functions:
 \itemize{
 \item \code{pred_matrix_valid}: Validation predictions
 \item \code{pred_matrix_test}: Test predictions

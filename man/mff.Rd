@@ -30,6 +30,10 @@ the degree of fuzziness in FCM-type methods.}
 \item{eta}{Numeric. Regularization parameter for the probabilistic FCM
 (\code{"pfcm"}) method. Controls the sharpness of probabilistic weights.}
 
+\item{iter.max}{Integer. The maximum number of iterations allowed.}
+
+\item{nstart}{Integer. K-means only. If \code{centers} is a number, how many random sets should be chosen.}
+
 \item{method}{Character string specifying the membership generation method.
 One of \code{"fcm"}, \code{"gk"}, \code{"pfcm"}, or \code{"kmeans"}.}
 }
@@ -37,7 +41,7 @@ One of \code{"fcm"}, \code{"gk"}, \code{"pfcm"}, or \code{"kmeans"}.}
 A list containing:
 \describe{
 \item{method}{The clustering method used.}
-\item{weight_matrix}{Column-standardized membership matrix.}
+\item{weights}{Column-standardized membership matrix.}
 \item{cluster_preds}{Matrix of cluster predictions.}
 \item{cluster_scores}{Evaluation metrics for each cluster.}
 }

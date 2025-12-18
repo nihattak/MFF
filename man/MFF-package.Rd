@@ -23,7 +23,7 @@ Core features include:
 \describe{
 \item{\code{mff()}}{Fit a fuzzy-cluster–based meta-ensemble model.}
 \item{\code{tune.mff()}}{Hyperparameter tuning for meta-fuzzy models.}
-\item{\code{predict.tune.mff()}}{Generate predictions using cluster-based weights. S3 method for predict()}
+\item{\code{predict.mff()}}{Generate predictions using cluster-based weights. S3 method for predict()}
 \item{\code{evaluate()}}{Compute evaluation metrics (MAE, RMSE, MAPE, SMAPE, MSE, MedAE).}
 \item{\code{model.train()}}{Train regression models (LM, Ridge, Lasso, Elastic Net, RF, XGBoost, LightGBM).}
 }

@@ -40,6 +40,10 @@
 #' @param method Character string specifying the membership generation method.
 #'        One of \code{"fcm"}, \code{"gk"}, \code{"pfcm"}, or \code{"kmeans"}.
 #'
+#' @param iter.max Integer. The maximum number of iterations allowed.
+#'
+#' @param nstart Integer. K-means only. If \code{centers} is a number, how many random sets should be chosen.
+#'
 #' @details
 #' The prediction matrix \code{x} is internally transposed so that each base model
 #' is treated as an individual observation in the meta-clustering procedure.
@@ -62,7 +66,7 @@
 #' @return A list containing:
 #' \describe{
 #'   \item{method}{The clustering method used.}
-#'   \item{weight_matrix}{Column-standardized membership matrix.}
+#'   \item{weights}{Column-standardized membership matrix.}
 #'   \item{cluster_preds}{Matrix of cluster predictions.}
 #'   \item{cluster_scores}{Evaluation metrics for each cluster.}
 #' }
@@ -88,9 +92,17 @@
 #'}
 #' @importFrom e1071 cmeans
 #' @importFrom ppclust gk pfcm
+#' @importFrom stats kmeans
 #'
 #' @export
 mff <- function(x, y, c = 3, m = 2, eta = 2,iter.max=1000,nstart = 100,method = c("fcm", "gk", "pfcm", "kmeans")) {
+  if (c > ncol(x)) {
+    stop(sprintf(
+      "Number of clusters (%d) cannot exceed the number of models (%d).",
+      c, ncol(x)
+    ))
+  }
+
   method <- match.arg(method)
 
   if (method == "fcm") {
@@ -120,7 +132,7 @@ mff <- function(x, y, c = 3, m = 2, eta = 2,iter.max=1000,nstart = 100,method = 
 
   out <- list(
     method = method,
-    weight_matrix = weight_matrix,
+    weights = weight_matrix,
     cluster_scores = cluster_scores
   )
 
