@@ -50,11 +50,12 @@ The helper function `model.train()` provides a convenient way to train multiple 
 ```{r}
 data <- MASS::Boston
 
+set.seed(123)
 result <- model.train(
   target = "medv",
-  df = data,
-  test_count = 50,
-  valid_count = 50
+  data = data,
+  ntest = 50,
+  nvalid = 50
 )
 
 str(result$pred_matrix_valid)
@@ -71,6 +72,7 @@ The resulting prediction matrix has one column per base model and one row per ob
 A standard MFF model learns a **single set of weights** (or cluster-specific weights if clustering is applied).
 
 ```{r}
+set.seed(123)
 mff_model <- mff(x = result$pred_matrix_valid,
 y = result$y_valid, c = 6, m = 3)
 mff_model
@@ -80,13 +82,28 @@ mff_model
 
 ### Tuned MFF
 
-The `tune.mff()` function evaluates multiple MFF configurations and selects the best-performing model according to a chosen metric.
+The `tune.mff()` function evaluates multiple MFF configurations and selects the best-performing model according to a chosen metric. With same seed and parameters `mff()` gives
+same result with tuning function.
 
 ```{r}
 mff_tuned <- tune.mff(x = result$pred_matrix_valid,
-y = result$y_valid, max_c = 6, iter.max = 100, nstart = 100, mff.method = "fcm")
+y = result$y_valid, max_c = 6, iter.max = 100, nstart = 100, mff.method = "fcm",seed = 123)
 mff_tuned
 ```
+
+```{r}
+best_weight_sorted <- sort(mff_tuned$best_weight, decreasing = F)
+
+barplot(
+  best_weight_sorted,
+  horiz = TRUE,
+  las = 1,
+  col = "steelblue",
+  xlab = "Model Weight",
+  main = "Optimized Model Weights"
+)
+```
+
 
 ------------------------------------------------------------------------
 
@@ -133,15 +150,15 @@ The `evaluate()` function measures prediction accuracy by comparing model output
 
 It requires two main arguments:
 
--   `y_pred`: the predicted values obtained from an MFF model
--   `y_true`: the true observed response values
+-   `predicted`: the predicted values obtained from an MFF model
+-   `actual`: the true observed response values
 
 The function returns standard performance metrics that summarize the predictive quality of the model.
 
 ```{r}
 evaluate(
-  y_pred = out$mff_preds,
-  y_true = result$y_test
+  predicted = out$mff_preds,
+  actual = result$y_test
 )
 ```
 

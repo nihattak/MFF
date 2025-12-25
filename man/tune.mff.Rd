@@ -101,9 +101,9 @@ The output also includes:
  boston <- MASS::Boston
  result_train <- model.train(
     target = "medv",
-    df = boston,
-    test_count = 50,
-    valid_count = 50
+    data = boston,
+    ntest = 50,
+    nvalid = 50
  )
 
  cluster_res <- tune.mff(result_train$pred_matrix_valid, result_train$y_valid,

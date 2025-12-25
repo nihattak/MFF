@@ -81,9 +81,9 @@
 #'  boston <- MASS::Boston
 #'  result_train <- model.train(
 #'     target = "medv",
-#'     df = boston,
-#'     test_count = 50,
-#'     valid_count = 50
+#'     data = boston,
+#'     ntest = 50,
+#'     nvalid = 50
 #'  )
 #'
 #'  cluster_res <- tune.mff(result_train$pred_matrix_valid, result_train$y_valid,
@@ -119,6 +119,7 @@ tune.mff <- function(x, y, max_c = 5, m_seq = seq(1.1, 3, by = 0.1),eta_seq = se
       c = 2:max_c,
       eta = eta_seq,
       iter.max = iter.max,
+      nstart = nstart,
       KEEP.OUT.ATTRS = FALSE
     )
   } else if (mff.method %in% c("fcm")) {
@@ -133,6 +134,7 @@ tune.mff <- function(x, y, max_c = 5, m_seq = seq(1.1, 3, by = 0.1),eta_seq = se
       m = m_seq,
       c = 2:max_c,
       iter.max = iter.max,
+      nstart = nstart,
       KEEP.OUT.ATTRS = FALSE
     )
   } else if (mff.method == "kmeans") {

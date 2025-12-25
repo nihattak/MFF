@@ -81,9 +81,9 @@
 #'  boston <- MASS::Boston
 #'  result_train <- model.train(
 #'     target = "medv",
-#'     df = boston,
-#'     test_count = 50,
-#'     valid_count = 50
+#'     data = boston,
+#'     ntest = 50,
+#'     nvalid = 50
 #'  )
 #'
 #'  mff_model <- mff(result_train$pred_matrix_valid, result_train$y_valid, c = 4,
@@ -95,7 +95,7 @@
 #' @importFrom stats kmeans
 #'
 #' @export
-mff <- function(x, y, c = 3, m = 2, eta = 2,iter.max=1000,nstart = 100,method = c("fcm", "gk", "pfcm", "kmeans")) {
+mff <- function(x, y, c, m=NULL, eta=NULL,iter.max=1000,nstart = 100,method = c("fcm", "gk", "pfcm", "kmeans")) {
   if (c > ncol(x)) {
     stop(sprintf(
       "Number of clusters (%d) cannot exceed the number of models (%d).",
@@ -110,11 +110,11 @@ mff <- function(x, y, c = 3, m = 2, eta = 2,iter.max=1000,nstart = 100,method = 
     membership <- result$membership
 
   } else if (method == "gk") {
-    result <- gk(t(x), centers = c, m = m,stand = T,iter.max=iter.max)
+    result <- gk(t(x), centers = c, m = m, nstart = nstart,stand = T,iter.max=iter.max)
     membership <- result$u
 
   } else if (method == "pfcm") {
-    result <- pfcm(t(x), centers = c, m = m, eta = eta,stand = T,iter.max=iter.max)
+    result <- pfcm(t(x), centers = c, m = m, nstart = nstart, eta = eta,stand = T,iter.max=iter.max)
     membership <- result$u
 
   } else if (method == "kmeans") {

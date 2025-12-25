@@ -4,18 +4,16 @@
 \alias{model.train}
 \title{Train Multiple Regression and ML Models and Produce Model Predictions}
 \usage{
-model.train(target, df, test_count, valid_count, seed = 123)
+model.train(target, data, ntest, nvalid)
 }
 \arguments{
 \item{target}{Character string. Name of the target column to predict.}
 
-\item{df}{A data frame containing the predictors and the target variable.}
+\item{data}{A data frame containing the predictors and the target variable.}
 
-\item{test_count}{Integer. Number of observations to allocate to the test set.}
+\item{ntest}{Integer. Number of observations to allocate to the test set.}
 
-\item{valid_count}{Integer. Number of observations to allocate to the validation set.}
-
-\item{seed}{Integer. Random number generator seed for reproducibility.}
+\item{nvalid}{Integer. Number of observations to allocate to the validation set.}
 }
 \value{
 A list containing:
@@ -32,7 +30,7 @@ Elastic Net, Random Forest, XGBoost, LightGBM,and returns prediction matrices fo
 test sets. It is designed for ensemble meta-learning workflows.
 }
 \details{
-The function randomly splits the dataframe into training, validation, and
+The function randomly splits the data frame into training, validation, and
 test sets based on given sample sizes. Each model is trained on the training
 set, and predictions are generated for validation and test sets. These
 predictions form the model prediction meta-fuzzy functions.
@@ -59,9 +57,9 @@ Validation and test predictions are returned for meta fuzzy functions:
  boston <- MASS::Boston
   result <- model.train(
     target = "medv",
-    df = boston,
-    test_count = 50,
-    valid_count = 50
+    data = boston,
+    ntest = 50,
+    nvalid = 50
   )
 
   head(result$pred_matrix_valid)

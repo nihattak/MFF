@@ -4,16 +4,15 @@
 #' Elastic Net, Random Forest, XGBoost, LightGBM,and returns prediction matrices for validation and
 #' test sets. It is designed for ensemble meta-learning workflows.
 #'
-#' The function randomly splits the dataframe into training, validation, and
+#' The function randomly splits the data frame into training, validation, and
 #' test sets based on given sample sizes. Each model is trained on the training
 #' set, and predictions are generated for validation and test sets. These
 #' predictions form the model prediction meta-fuzzy functions.
 #'
 #' @param target Character string. Name of the target column to predict.
-#' @param df A data frame containing the predictors and the target variable.
-#' @param test_count Integer. Number of observations to allocate to the test set.
-#' @param valid_count Integer. Number of observations to allocate to the validation set.
-#' @param seed Integer. Random number generator seed for reproducibility.
+#' @param data A data frame containing the predictors and the target variable.
+#' @param ntest Integer. Number of observations to allocate to the test set.
+#' @param nvalid Integer. Number of observations to allocate to the validation set.
 #'
 #' @details
 #' **Models trained**
@@ -47,9 +46,9 @@
 #'  boston <- MASS::Boston
 #'   result <- model.train(
 #'     target = "medv",
-#'     df = boston,
-#'     test_count = 50,
-#'     valid_count = 50
+#'     data = boston,
+#'     ntest = 50,
+#'     nvalid = 50
 #'   )
 #'
 #'   head(result$pred_matrix_valid)
@@ -63,25 +62,23 @@
 #' @importFrom stats lm predict model.matrix as.formula
 #'
 #' @export
-model.train <- function(target,df,test_count,valid_count,seed = 123) {
-n <- nrow(df)
-
-set.seed(seed)
+model.train <- function(target,data,ntest,nvalid) {
+n <- nrow(data)
 
 # Validation set
-valid_index <- sample(seq_len(n), size = valid_count)
+valid_index <- sample(seq_len(n), size = nvalid)
 remaining <- setdiff(seq_len(n), valid_index)
 
 # Test set
-test_index <- sample(remaining, size = test_count)
+test_index <- sample(remaining, size = ntest)
 
 # Train set
 train_index <- setdiff(remaining, test_index)
 
 # Create sets
-train_data <- df[train_index, ]
-valid_data <- df[valid_index, ]
-test_data  <- df[test_index, ]
+train_data <- data[train_index, ]
+valid_data <- data[valid_index, ]
+test_data  <- data[test_index, ]
 
 # Training models
 # Formula for models (no feature selection)
@@ -103,25 +100,21 @@ X_test <- model.matrix(formula, test_data)[, -1]
 y_test <- as.matrix(test_data[target])
 
 # Lasso
-set.seed(seed)
 cv_model_lasso <- cv.glmnet(X_train, y_train, alpha = 1, nfolds = 10)
 lasso_pred_valid <- predict(cv_model_lasso,s = "lambda.min" ,X_valid)
 lasso_pred_test <- predict(cv_model_lasso,s = "lambda.min" ,X_test)
 
 # Ridge
-set.seed(seed)
 cv_model_ridge <- cv.glmnet(X_train, y_train, alpha = 0, nfolds = 10)
 ridge_pred_valid <- predict(cv_model_ridge,s = "lambda.min" ,X_valid)
 ridge_pred_test <- predict(cv_model_ridge,s = "lambda.min" ,X_test)
 
 # Elastic Net
-set.seed(seed)
 cv_model_elastic <- cv.glmnet(X_train, y_train, alpha = 0.5, nfolds = 10)
 elastic_pred_valid <- predict(cv_model_elastic,s = "lambda.min" ,X_valid)
 elastic_pred_test <- predict(cv_model_elastic,s = "lambda.min" ,X_test)
 
 # Random Forest (RF)
-set.seed(seed)
 rf_model <- randomForest(formula, data = train_data, ntree = 100)
 rf_pred_valid <- predict(rf_model,valid_data)
 rf_pred_test <- predict(rf_model,test_data)
@@ -133,7 +126,7 @@ max_depth = 6
 
 xgboost_dtrain <- xgb.DMatrix(X_train, label = y_train)
 xgboost_params <- list(objective = "reg:squarederror", eta = eta, max_depth = max_depth, eval_metric = "rmse")
-set.seed(seed)
+
 xgboost_model <- xgb.train(xgboost_params, xgboost_dtrain, nrounds = nrounds, verbose = 0)
 xgboost_pred_valid <- predict(xgboost_model, xgb.DMatrix(X_valid))
 xgboost_pred_test <- predict(xgboost_model, xgb.DMatrix(X_test))
@@ -143,7 +136,7 @@ learning_rate = 0.05
 num_leaves = 31
 
 lightgbm_dtrain <- lgb.Dataset(X_train, label = y_train)
-lightgbm_params <- list(objective = "regression", metric = "rmse", learning_rate = learning_rate, num_leaves = num_leaves, verbose = -1 ,seed = seed, force_row_wise = TRUE)
+lightgbm_params <- list(objective = "regression", metric = "rmse", learning_rate = learning_rate, num_leaves = num_leaves, verbose = -1, force_row_wise = TRUE)
 lightgbm_model <- lgb.train(lightgbm_params, lightgbm_dtrain, nrounds = nrounds, verbose = -1)
 lightgbm_pred_valid <- predict(lightgbm_model, X_valid)
 lightgbm_pred_test <- predict(lightgbm_model, X_test)

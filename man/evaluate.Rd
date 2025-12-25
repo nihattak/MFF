@@ -4,13 +4,13 @@
 \alias{evaluate}
 \title{Compute Error Metrics for Predicted Values}
 \usage{
-evaluate(y_pred, y_true)
+evaluate(predicted, actual)
 }
 \arguments{
-\item{y_pred}{Numeric vector or numeric matrix of predicted values.
+\item{predicted}{Numeric vector or numeric matrix of predicted values.
 If a matrix is provided, each column is evaluated separately.}
 
-\item{y_true}{Numeric vector of true target values corresponding to
+\item{actual}{Numeric vector of true target values corresponding to
 the rows of \code{preds}.}
 }
 \value{
@@ -65,14 +65,11 @@ for percentage-based metrics.
 }
 \examples{
 \dontrun{
-  boston <- MASS::Boston
-  results <- model.train(
-    target = "medv",
-    df = boston,
-    test_count = 50,
-    valid_count = 50
-  )
-  evaluate(results$pred_matrix_valid,results$y_valid)
+  x <- seq(100)
+  y <- 2 * x + rnorm(100)
+  model <- lm(y ~ x)
+  pred <- predict(model)
+  evaluate(pred,y)
 }
 
 }

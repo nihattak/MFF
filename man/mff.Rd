@@ -7,9 +7,9 @@
 mff(
   x,
   y,
-  c = 3,
-  m = 2,
-  eta = 2,
+  c,
+  m = NULL,
+  eta = NULL,
   iter.max = 1000,
   nstart = 100,
   method = c("fcm", "gk", "pfcm", "kmeans")
@@ -93,9 +93,9 @@ Cluster-wise performance metrics are computed using \code{evaluate()}.
  boston <- MASS::Boston
  result_train <- model.train(
     target = "medv",
-    df = boston,
-    test_count = 50,
-    valid_count = 50
+    data = boston,
+    ntest = 50,
+    nvalid = 50
  )
 
  mff_model <- mff(result_train$pred_matrix_valid, result_train$y_valid, c = 4,

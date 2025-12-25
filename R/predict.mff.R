@@ -48,9 +48,9 @@
 #'  boston <- MASS::Boston
 #'  result_train <- model.train(
 #'     target = "medv",
-#'     df = boston,
-#'     test_count = 50,
-#'     valid_count = 50
+#'     data = boston,
+#'     ntest = 50,
+#'     nvalid = 50
 #'  )
 #'
 #'  mff_tune_model <- tune.mff(result_train$pred_matrix_valid, result_train$y_valid, max_c = 6,

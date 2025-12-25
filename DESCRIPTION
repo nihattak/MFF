@@ -6,6 +6,11 @@ Authors@R: c(
     person(
       "Nihat", "Tak",
       email = "nihattak@gmail.com",
+      role = "aut"
+    ),
+    person(
+      "Sadık", "Çoban",
+      email = "sadikc716@gmail.com",
       role = c("aut", "cre")
     )
   )

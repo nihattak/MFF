@@ -15,10 +15,10 @@
 #' For matrix input, metrics are computed column-wise and returned as a
 #' multi-row data frame.
 #'
-#' @param y_pred Numeric vector or numeric matrix of predicted values.
+#' @param predicted Numeric vector or numeric matrix of predicted values.
 #'        If a matrix is provided, each column is evaluated separately.
 #'
-#' @param y_true Numeric vector of true target values corresponding to
+#' @param actual Numeric vector of true target values corresponding to
 #'        the rows of \code{preds}.
 #'
 #' @details
@@ -57,20 +57,17 @@
 #'
 #' @examples
 #' \dontrun{
-#'   boston <- MASS::Boston
-#'   results <- model.train(
-#'     target = "medv",
-#'     df = boston,
-#'     test_count = 50,
-#'     valid_count = 50
-#'   )
-#'   evaluate(results$pred_matrix_valid,results$y_valid)
+#'   x <- seq(100)
+#'   y <- 2 * x + rnorm(100)
+#'   model <- lm(y ~ x)
+#'   pred <- predict(model)
+#'   evaluate(pred,y)
 #' }
 #'
 #' @importFrom stats median
 #'
 #' @export
-evaluate <- function(y_pred, y_true) {
+evaluate <- function(predicted, actual) {
 
   compute_metrics <- function(p, y) {
     errors <- p - y
@@ -92,12 +89,12 @@ evaluate <- function(y_pred, y_true) {
     ))
   }
 
-  if (!is.matrix(y_pred)) {
-    m <- compute_metrics(y_pred, y_true)
+  if (!is.matrix(predicted)) {
+    m <- compute_metrics(predicted, actual)
     return(t(m))
   }
 
-  results <- t(apply(y_pred, 2, function(p) compute_metrics(p, y_true)))
+  results <- t(apply(predicted, 2, function(p) compute_metrics(p, actual)))
 
   return(results)
 }
