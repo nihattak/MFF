@@ -16,84 +16,65 @@ mff(
 )
 }
 \arguments{
-\item{x}{A numeric matrix of model predictions with dimensions
-\code{samples × models}. Each column represents a base learner.}
+\item{x}{A numeric matrix of base-model predictions.}
 
-\item{y}{A numeric vector containing the true response values corresponding
-to the rows of \code{x}. Used for evaluating cluster-wise meta-predictions.}
+\item{y}{A numeric vector of true response values.}
 
-\item{c}{Integer. Number of fuzzy clusters/components to estimate.}
+\item{c}{An integer specifying the number of clusters (functions).}
 
-\item{m}{Numeric. Fuzzy exponent parameter (usually \code{m = 2}). Controls
-the degree of fuzziness in FCM-type methods.}
+\item{m}{A numeric fuzziness exponent (typically m = 2) used in FCM-type membership
+estimation. Larger values increase fuzziness (more diffuse memberships), while values closer to 1 yield
+sharper assignments.}
 
-\item{eta}{Numeric. Regularization parameter for the probabilistic FCM
-(\code{"pfcm"}) method. Controls the sharpness of probabilistic weights.}
+\item{eta}{numeric regularization parameter used by the possibilistic FCM method (method =
+"pfcm").}
 
-\item{iter.max}{Integer. The maximum number of iterations allowed.}
+\item{iter.max}{An integer specifying the maximum number of iterations allowed for the clustering
+algorithm.}
 
-\item{nstart}{Integer. K-means only. If \code{centers} is a number, how many random sets should be chosen.}
+\item{nstart}{n integer controlling the number of random initializations used when method =
+"kmeans" to improve robustness of the final clustering solution}
 
-\item{method}{Character string specifying the membership generation method.
-One of \code{"fcm"}, \code{"gk"}, \code{"pfcm"}, or \code{"kmeans"}.}
+\item{method}{A character string selecting the membership-generation method. Available options
+are "fcm", "gk", "pfcm", and "kmeans".}
 }
 \value{
 A list containing:
-\describe{
-\item{method}{The clustering method used.}
-\item{weights}{Column-standardized membership matrix.}
-\item{cluster_preds}{Matrix of cluster predictions.}
-\item{cluster_scores}{Evaluation metrics for each cluster.}
+\itemize{
+\item \code{method}: The clustering method used for membership estimation.
+\item \code{weights}: A column-standardized membership (weight) matrix.
+\item \code{cluster_preds}: A numeric matrix of meta fuzzy functions' predictions.
+\item \code{cluster_scores}: A data frame of evaluation metrics computed for each cluster(function).
 }
 }
 \description{
-\code{mff()} serves as the core generator for the Meta-Fuzzy Function (MFF)
-framework. It supports four membership-building methods:
-
-\itemize{
-\item \strong{"fcm"}: Classical Fuzzy C-Means (Euclidean, spherical clusters)
-\item \strong{"gk"}: Gustafson–Kessel Fuzzy Clustering (adaptive anisotropic shapes)
-\item \strong{"pfcm"}: Probabilistic Fuzzy C-Means (softmax-like membership)
-\item \strong{"kmeans"}: Deterministic K-means converted to fuzzy memberships
-}
-
-All methods produce a weight matrix with dimensions
-\code{models × clusters}, fully compatible with \code{predict()}, which then
-computes cluster-wise meta-predictions by linearly combining model predictions
-weighted by crisp/fuzzy memberships.
+Construct meta-fuzzy functions by computing membership weights and cluster-wise
+predictions.
 }
 \details{
-This function computes model-level fuzzy or probabilistic memberships using
-several meta-fuzzy clustering methods applied to the model prediction matrix \code{x}.
-Each base model is represented by its prediction vector across samples, and fuzzy
-memberships are estimated in this meta-prediction space. The resulting membership
-matrix is then used to produce cluster-wise predictions via
-\code{predict()}, and cluster-level evaluation statistics are calculated.
+The \emph{mff} function is the core constructor of the Meta Fuzzy Function (MFF) framework. It
+takes a matrix of base-model predictions and derives a membership-weight structure
+that defines multiple meta fuzzy functions using a selected membership-generation method. In
+the MFF setting, each base learner is represented by its prediction vector across samples;
+therefore, \emph{mff} internally transposes the prediction matrix so that base models are treated as
+observations in the meta-clustering space. The resulting membership matrix is then used to
+form meta fuzzy function predictions through weighted aggregation of base-model outputs.
 
-The prediction matrix \code{x} is internally transposed so that each base model
-is treated as an individual observation in the meta-clustering procedure.
-Membership matrices are standardized column-wise using \code{prop.table()}
-to ensure that the total membership weight within each cluster sums to 1.
-
-After membership estimation, the function applies \code{predict()} to construct
-cluster-specific meta-predictions using:
-
-\deqn{\mathrm{MFF}_{cluster} = w \times X}
-
-where:
-\itemize{
-\item \eqn{w}: weight matrix calculated by crisp/fuzzy memberships
-\item \eqn{X}: model prediction matrix
-}
-
-Cluster-wise performance metrics are computed using \code{evaluate()}.
+The function supports four membership-generation methods: classical Fuzzy C-Means
+(FCM), Gustafson--Kessel (GK) clustering for anisotropic structures, possibilistic FCM
+(PFCM) producing softmax-like weights, and deterministic k-means converted to pseudo-
+fuzzy memberships. After membership estimation, meta fuzzy function predictions are
+computed via linear combinations of base-model predictions and the learned membership-
+based weights, and the predictive performance of each meta fuzzy function is assessed using
+\emph{evaluate}. Membership weights are standardized column-wise to ensure that the total
+contribution of base models within each meta fuzzy function sums to one, facilitating
+interpretation and comparison across meta fuzzy functions.
 }
 \examples{
 \dontrun{
- boston <- MASS::Boston
  result_train <- model.train(
     target = "medv",
-    data = boston,
+    data = MASS::Boston,
     ntest = 50,
     nvalid = 50
  )
@@ -103,8 +84,16 @@ Cluster-wise performance metrics are computed using \code{evaluate()}.
  mff_model
 }
 }
+\references{
+\itemize{
+\item Bezdek, J. C., Ehrlich, R., & Full, W. (1984). FCM: The fuzzy c-means clustering algorithm. \emph{Computers & Geosciences}, 10(2-3), 191-203.
+\item Gustafson, E. E., & Kessel, W. C. (1978). Fuzzy clustering with a fuzzy covariance matrix. \emph{1978 IEEE Conference on Decision and Control including the 17th Symposium on Adaptive Processes}, 761-766.
+\item Pal, N. R., Pal, K., Keller, J. M., & Bezdek, J. C. (2005). A possibilistic fuzzy c-means clustering algorithm. \emph{IEEE Transactions on Fuzzy Systems}, 13(4), 517-530.
+}
+}
 \seealso{
-\code{predict()} for cluster-wise prediction,
-\code{cmeans()}, \code{gk()}, \code{pfcm()}, \code{kmeans()}
-for membership generation algorithms.
+\code{\link{model.train}} for preparing input matrices,
+\code{\link{predict.mff}} for test set predictions,
+\code{\link{tune.mff}} for hyperparameter optimization,
+\code{\link{evaluate}} for performance metrics.
 }

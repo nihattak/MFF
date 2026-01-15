@@ -19,100 +19,83 @@ tune.mff(
 )
 }
 \arguments{
-\item{x}{A numeric matrix containing model predictions, where rows
-represent observations and columns represent base models.}
+\item{x}{A numeric matrix of base-model predictions with dimensions \eqn{samples \times models}{samples x models}. Each
+column corresponds to a base learner.}
 
-\item{y}{A numeric vector of true validation values used to evaluate
-cluster-based predicted outputs.}
+\item{y}{numeric vector of validation targets. This vector is used to evaluate meta fuzzy function
+predictions.}
 
-\item{max_c}{Integer. Maximum number of clusters to search up to.}
-
-\item{m_seq}{Numeric vector. Search values for the fuzziness index parameter \code{m}.}
-
-\item{eta_seq}{Numeric vector. Search values for the possibilistic parameter
-\code{eta} searched when \code{mff.method = "pfcm"}.}
-
-\item{iter.max}{Integer. The maximum number of iterations allowed.}
-
-\item{nstart}{Integer. K-means only. If \code{centers} is a number, how many random sets should be chosen.}
-
-\item{seed}{Integer. Seed for reproducibility during weight computation.}
-
-\item{mff.method}{Character string specifying the meta-fuzzy functions.
-One of \code{"fcm"}, \code{"gk"}, \code{"pfcm"},
-or \code{"kmeans"}.}
-
-\item{eval.method}{Character string specifying the metric used to select the
-best configuration. One of \code{MAE}, \code{RMSE},
-\code{MAPE},\code{SMAPE},\code{MSE} or \code{MedAE}.}
-
-\item{logging}{Logical. If \code{TRUE}, prints progress information during the
+\item{max_c}{An integer specifying the maximum number of clusters to be considered in the
 search.}
+
+\item{m_seq}{A numeric vector of candidate values for the fuzziness exponent m used in FCM-
+type methods.}
+
+\item{eta_seq}{A numeric vector of candidate values for the probabilistic regularization parameter
+\eqn{\eta}{eta} used when mff.method = "pfcm".}
+
+\item{iter.max}{An integer specifying the maximum number of iterations allowed for the clustering
+algorithm within each grid evaluation..}
+
+\item{nstart}{integer; An integer controlling the number of random initializations for k-means
+when mff.method = "kmeans".}
+
+\item{seed}{An integer used to set the random seed for reproducibility during weight computation
+and parameter search.}
+
+\item{mff.method}{A character string selecting the membership-generation method.}
+
+\item{eval.method}{A character string specifying the metric used to select the best-performing
+meta fuzzy function.}
+
+\item{logging}{A logical flag indicating whether progress information is printed during the search.}
 }
 \value{
-A list containing:
-\describe{
-\item{algorithm}{Selected clustering method.}
-\item{eval.method}{Evaluation metric used in the search.}
-\item{weights}{Weight matrix associated with the best configuration.}
-\item{best_params}{List of hyperparameters that obtained the best score.}
-\item{best_cluster}{Index of the cluster giving the lowest error.}
-\item{best_weight}{Weight vector for the best-performing cluster.}
-\item{best_scores}{Full evaluation scores for all clusters under the best configuration.}
+\itemize{
+\item \code{algorithm}: The selected membership-generation method.
+\item \code{eval.method}: The evaluation metric used in model selection.
+\item \code{weights}: The membership (weight) matrix associated with the best-performing
+configuration.
+\item \code{best_params}: A list containing the hyperparameters that achieved the best score.
+\item \code{best_cluster}: The index of the meta fuzzy function yielding the minimum validation error.
+\item \code{best_weight}: The weight vector corresponding to the best-performing meta fuzzy function.
+\item \code{best_scores}: The full set of evaluation scores for all meta fuzzy function predictions under
+the best configuration.
 }
 }
 \description{
-\code{tune.mff()} iterates over a predefined grid of parameter combinations
-to identify the configuration that yields the lowest validation error.
-Weights are generated using \code{mff()}, and cluster-based predicted
-values are evaluated using the provided metric (\code{MAE}, \code{RMSE},
-\code{MAPE},\code{SMAPE},\code{MSE} or \code{MedAE}).
-
-The search spans different parameter spaces depending on the selected method:
-\itemize{
-\item \strong{FCM}: searches over \code{m} and \code{c}.
-\item \strong{GK}: searches over \code{m} and \code{c} with coarser steps.
-\item \strong{PFCM}: searches over \code{m}, \code{c}, and \code{eta}.
-\item \strong{K-Means}: searches only over \code{c}.
-}
+The \emph{tune.mff} function performs hyperparameter optimization for Meta Fuzzy Functions
+(MFFs) by searching over clustering-related parameter combinations and selecting the configuration that
+yields the lowest validation error.
 }
 \details{
-This function performs a structured search over hyperparameters used to obtain
-the best meta fuzzy functions. For a given model prediction matrix and
-validation target vector, it evaluates multiple configurations of
-\code{m}, \code{c}, and \code{eta} depending on the selected clustering
-method. The function returns the best-performing configuration according
-to the specified evaluation metric.
+Given a matrix of base-model predictions and the corresponding validation targets, \emph{tune.mff}
+repeatedly calls \emph{mff} to compute membership weights, generate meta fuzzy function
+predictions, and evaluate these predictions using a user-specified metric. The best
+configuration is determined by the minimum value of the selected evaluation metric among
+the scores obtained from the meta fuzzy function predictions produced under each candidate
+setting.
 
-For each parameter combination in the search grid, \code{mff()} is
-executed to compute weights, cluster-based predictions, and evaluation
-statistics. The best configuration is determined by the minimum value among
-the cluster-specific scores for the selected evaluation metric.
-
-The output also includes:
-\itemize{
-\item The best cluster index (cluster yielding minimum error)
-\item The weights corresponding to the best cluster
-\item The set of hyperparameters that achieved the best score
-}
+The search space depends on the selected membership-generation method. For classical Fuzzy
+C-Means ("fcm") and Gustafson-Kessel clustering ("gk"), the function explores combinations
+of the number of clusters c and the fuzziness index m. For possibilistic FCM ("pfcm"), the
+grid additionally includes the possibilistic regularization parameter \eqn{\eta}{eta}. For k-means
+("kmeans"), the search is performed only over the number of clusters(c). The function returns
+the best-performing configuration together with the corresponding weight structure, the index
+of the best-performing meta fuzzy function, and the full set of evaluation results, enabling
+transparent reporting and reproducible model selection.
 }
 \examples{
 \dontrun{
- boston <- MASS::Boston
- result_train <- model.train(
-    target = "medv",
-    data = boston,
-    ntest = 50,
-    nvalid = 50
- )
-
- cluster_res <- tune.mff(result_train$pred_matrix_valid, result_train$y_valid,
- max_c = 6, iter.max=100,nstart = 100,mff.method = "kmeans")
-
- cluster_res
+  res <- model.train(target="medv", data=MASS::Boston, ntest=50, nvalid=50)
+  fit <- tune.mff(res$pred_matrix_valid, res$y_valid, max_c=6, mff.method="kmeans")
+  out <- predict(fit, pred_matrix=res$pred_matrix_test, type="best")
+  head(out$mff_preds)
+  out$mff_weights
 }
+
 
 }
 \seealso{
-\code{mff} for generating weight and cluster-based predictions.
+\code{\link{mff}}, \code{\link{model.train}}, \code{\link{predict.mff}}
 }

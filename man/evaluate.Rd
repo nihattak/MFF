@@ -2,74 +2,49 @@
 % Please edit documentation in R/evaluate.R
 \name{evaluate}
 \alias{evaluate}
-\title{Compute Error Metrics for Predicted Values}
+\title{Compute error metrics for predicted values or prediction matrices}
 \usage{
 evaluate(predicted, actual)
 }
 \arguments{
-\item{predicted}{Numeric vector or numeric matrix of predicted values.
-If a matrix is provided, each column is evaluated separately.}
+\item{predicted}{numeric vector or numeric matrix of predictions. If matrix, columns are evaluated
+separately.}
 
-\item{actual}{Numeric vector of true target values corresponding to
-the rows of \code{preds}.}
+\item{actual}{numeric vector of true target values.}
 }
 \value{
-A data frame with the following columns:
-\describe{
-\item{MAE}{Mean Absolute Error}
-\item{RMSE}{Root Mean Square Error}
-\item{MAPE}{Mean Absolute Percentage Error}
-\item{SMAPE}{Symmetric Mean Absolute Percentage Error}
-\item{MSE}{Mean Squared Error}
-\item{MedAE}{Median Absolute Error}
-}
+A data frame with columns MAE, RMSE, MAPE, SMAPE, MSE, and MedAE, with one row
+per evaluated prediction vector.
 }
 \description{
-\code{evaluate()} supports two input formats:
-\itemize{
-\item A numeric vector of predicted values.
-\item A numeric matrix where each column represents the predictions from
-a different model or cluster.
-}
-
-For vector input, the function returns a single-row data frame.
-For matrix input, metrics are computed column-wise and returned as a
-multi-row data frame.
+Compute error metrics for predicted values or prediction matrices by comparing them with
+the corresponding true response values.
 }
 \details{
-Computes multiple regression error metrics for predicted values by comparing
-them to the true target values.
-
-The following performance metrics are computed:
-
-\strong{Mean Absolute Error (MAE):}
-\deqn{ MAE = mean(|\hat{y} - y|) }
-
-\strong{Root Mean Square Error (RMSE):}
-\deqn{ RMSE = \sqrt{mean((\hat{y} - y)^2)} }
-
-\strong{Mean Absolute Percentage Error (MAPE):}
-\deqn{ MAPE = mean(|(\hat{y} - y)/(y + \varepsilon)|) \times 100 }
-
-\strong{Symmetric Mean Absolute Percentage Error (SMAPE):}
-\deqn{ SMAPE = mean\left(\frac{2|\hat{y} - y|}{|\hat{y}| + |y| + \varepsilon}\right) \times 100 }
-
-\strong{Mean Squared Error (MSE):}
-\deqn{ MSE = mean((\hat{y} - y)^2) }
-
-\strong{Median Absolute Error (MedAE):}
-\deqn{ MedAE = median(|\hat{y} - y|) }
-
-A small constant \eqn{\varepsilon = 1e-8} is added to avoid division by zero
-for percentage-based metrics.
+The evaluate function is used to quantify the predictive performance of meta fuzzy function
+predictions by comparing them with the corresponding true response values. It supports both
+vector- and matrix-valued prediction inputs, allowing performance assessment of a single
+meta fuzzy function as well as simultaneous evaluation of multiple meta fuzzy functions.
+When a prediction vector is provided, the function computes a single set of performance
+metrics; when a prediction matrix is provided, metrics are computed separately for each meta
+fuzzy function.
 }
 \examples{
-\dontrun{
-  x <- seq(100)
-  y <- 2 * x + rnorm(100)
-  model <- lm(y ~ x)
-  pred <- predict(model)
-  evaluate(pred,y)
-}
+x <- seq(100)
+y <- 2*x + stats::rnorm(100)
+m <- stats::lm(y ~ x)
+pred <- stats::predict(m)
+evaluate(pred, y)
 
+}
+\references{
+\itemize{
+\item Hyndman, R. J., & Koehler, A. B. (2006). Another look at measures of forecast accuracy. \emph{International Journal of Forecasting}, 22(4), 679-688.
+\item Willmott, C. J., & Matsuura, K. (2005). Advantages of the mean absolute error (MAE) over the root mean square error (RMSE) in assessing average model performance. \emph{Climate Research}, 30(1), 79-82.
+}
+}
+\seealso{
+\code{\link{mff}} for generating predictions,
+\code{\link{model.train}} for preparing base model prediction matrices,
+\code{\link{tune.mff}} for hyperparameter tuning performance.
 }

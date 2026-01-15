@@ -6,12 +6,12 @@ Authors@R: c(
     person(
       "Nihat", "Tak",
       email = "nihattak@gmail.com",
-      role = "aut"
+      role = c("aut", "cre")
     ),
     person(
       "Sadık", "Çoban",
       email = "sadikc716@gmail.com",
-      role = c("aut", "cre")
+      role = "aut"
     )
   )
 Description: Ensembles various models via fuzzy clustering methods.

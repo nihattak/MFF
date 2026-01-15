@@ -37,11 +37,11 @@ multiple base models.
 }
 
 \author{
-\strong{Maintainer}: Sadık Çoban \email{sadikc716@gmail.com}
+\strong{Maintainer}: Nihat Tak \email{nihattak@gmail.com}
 
 Authors:
 \itemize{
-  \item Nihat Tak \email{nihattak@gmail.com}
+  \item Sadık Çoban \email{sadikc716@gmail.com}
 }
 
 }
