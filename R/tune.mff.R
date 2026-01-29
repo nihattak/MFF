@@ -1,11 +1,11 @@
 #' Hyperparameter Search for Meta-Fuzzy Function
 #'
 #' @description
-#' The \emph{tune.mff} function performs hyperparameter optimization for Meta Fuzzy Functions
+#' The \emph{tune.mff} function performs hyperparameter optimization via grid search for Meta Fuzzy Functions
 #' (MFFs) by searching over clustering-related parameter combinations and selecting the configuration that
 #' yields the lowest validation error.
 #'
-#' @param x A numeric matrix of base-model predictions with dimensions \eqn{samples \times models}{samples x models}. Each
+#' @param x A numeric matrix of base-model predictions with dimensions \eqn{N_{test} \times M}. Each
 #' column corresponds to a base learner.
 #' @param y numeric vector of validation targets. This vector is used to evaluate meta fuzzy function
 #' predictions.
@@ -60,7 +60,7 @@
 #'
 #' @examples
 #' \dontrun{
-#'   res <- model.train(target="medv", data=MASS::Boston, ntest=50, nvalid=50)
+#'   res <- model.train(target="medv", data=MASS::Boston, ntest=50, nvalid=50, seed = 123)
 #'   fit <- tune.mff(res$pred_matrix_valid, res$y_valid, max_c=6, mff.method="kmeans")
 #'   out <- predict(fit, pred_matrix=res$pred_matrix_test, type="best")
 #'   head(out$mff_preds)

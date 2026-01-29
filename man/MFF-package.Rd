@@ -37,12 +37,6 @@ multiple base models.
 }
 
 \author{
-\strong{Maintainer}: Nihat Tak \email{nihattak@gmail.com}
-
-Authors:
-\itemize{
-  \item Sadık Çoban \email{sadikc716@gmail.com}
+\strong{Maintainer}: Nihat Tak
+\strong{Authors}: Nihat Tak, Sadık Çoban
 }
-
-}
-\keyword{internal}

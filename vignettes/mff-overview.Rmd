@@ -50,12 +50,12 @@ The helper function `model.train()` provides a convenient way to train multiple 
 ```{r}
 data <- MASS::Boston
 
-set.seed(123)
 result <- model.train(
   target = "medv",
   data = data,
   ntest = 50,
-  nvalid = 50
+  nvalid = 50,
+  seed = 123
 )
 
 str(result$pred_matrix_valid)

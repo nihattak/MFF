@@ -1,7 +1,7 @@
 #' Compute Weights for K-means-Based Membership Assignment (Internal)
 #'
 #' This internal helper function converts hard K-means cluster assignments
-#' into a simple membership weight matrix. Each element of the input vector
+#' into a simple weight matrix. Each element of the input vector
 #' represents the cluster index assigned to a model. The function computes
 #' weights based on cluster frequencies, assigning each model a weight
 #' inversely proportional to the size of its cluster.
@@ -37,21 +37,12 @@
 #'         vector has names.
 #'
 #' @details
-#' This function is intended to provide soft membership-like weights for
-#' K-means-based meta-modeling (MKF). Unlike fuzzy methods, weights do not sum
-#' to 1 across each row; they directly reflect inverse cluster frequencies.
+#' This function is intended to provide weights for Meta Fuzzy Function.
+#' Unlike fuzzy methods, weights do not sum to 1 across each row;
+#' they directly reflect inverse cluster frequencies.
 #'
 #' @keywords internal
 mkf_weight <- function(clusters) {
-  # cluster_sizes her bir clusterin kaç tane olduğunu hesaplar
-  # weights ağırlıklandırır ama seçimi vektörden fazla yapınca
-  # c(1,2,2,2,3) 3 tane clusterlı bir model için o da ona göre atamaları yapar yani tekrarlı seçer
-  # weight_matrixte ise [cbind(seq_len(n), clusters)] [i,j] şeklinde çalışır aşağıdaki for
-  # for (i in 1:n) {
-  # weight_matrix[i, clusters[i]] <- weights[i]
-  # }
-  # if'te de model isimleri matrise yeniden atanır eğer varsa ve çıktı verilir.
-
   k <- max(clusters)
   n <- length(clusters)
 

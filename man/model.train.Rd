@@ -2,9 +2,9 @@
 % Please edit documentation in R/model.train.R
 \name{model.train}
 \alias{model.train}
-\title{Train Multiple Regression and ML Models and Produce Model Predictions}
+\title{Train Multiple Regression and Produce Model Predictions}
 \usage{
-model.train(target, data, ntest, nvalid)
+model.train(target, data, ntest, nvalid, seed = 123)
 }
 \arguments{
 \item{target}{character string specifying the name of the response variable in the data frame. This
@@ -18,9 +18,11 @@ except target are treated as predictors.}
 set is completely held out from model training and validation and is used for final
 performance assessment.}
 
-\item{nvalid}{integer; n integer specifying the number of observations assigned to the validation
-set. Predictions on this subset are used to construct Meta Fuzzy Functions and to tune
-clustering-related hyperparameters.}
+\item{nvalid}{An integer specifying the number of observations assigned to the validation set. Predic-
+tions on this subset are used to construct Meta Fuzzy Functions and to tune clustering-related
+hyperparameters.}
+
+\item{seed}{An integer used to set the random seed for reproducibility.}
 }
 \value{
 A list containing:
@@ -39,7 +41,7 @@ Function framework.
 }
 \details{
 Splits data into train/validation/test, then fits a suite of base learners and generates predictions
-for validation and test. Predictions are returned as matrices with dimension \eqn{samples \times models}{samples x models}.
+for validation and test. Predictions are returned as matrices with dimension \eqn{N_{test} \times M}.
 These matrices are the standard input \eqn{x}{x} for \code{mff()} and \code{tune.mff()}.
 
 Base learners include linear regression, Lasso, Ridge, Elastic Net, Random Forest, XGBoost,
@@ -64,7 +66,8 @@ MFF framework with precomputed model outputs.
     target = "medv",
     data = boston,
     ntest = 50,
-    nvalid = 50
+    nvalid = 50,
+    seed = 123
   )
 
   head(result$pred_matrix_valid)
@@ -73,10 +76,28 @@ MFF framework with precomputed model outputs.
 
 }
 \references{
-\itemize{
-\item Tibshirani, R. (1996). Regression shrinkage and selection via the lasso. \emph{Journal of the Royal Statistical Society: Series B (Methodological)}, 58(1), 267-288.
-\item Chen, T., & Guestrin, C. (2016). XGBoost: A scalable tree boosting system. \emph{Proceedings of the 22nd acm sigkdd international conference on knowledge discovery and data mining}.
-}
+Breiman, L. (2001). Random forests. \emph{Machine Learning}, 45(1), 5-32.
+\doi{10.1023/A:1010933404324}
+
+Chen, T., & Guestrin, C. (2016). XGBoost: A Scalable Tree Boosting System.
+In \emph{Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining},
+785-794. \doi{10.1145/2939672.2939785}
+
+Chen, T., He, T., Benesty, M., et al. (2025). \emph{xgboost: Extreme Gradient Boosting}.
+R package version 3.1.2.1. \url{https://CRAN.R-project.org/package=xgboost}
+
+Ke, G., Meng, Q., Finley, T., et al. (2017). LightGBM: A highly efficient gradient boosting decision tree.
+In \emph{Proceedings of the 31st International Conference on Neural Information Processing Systems},
+3149-3157.
+
+Liaw, A., & Wiener, M. (2002). Classification and Regression by randomForest.
+\emph{R News}, 2(3), 18-22. \url{https://CRAN.R-project.org/doc/Rnews/}
+
+Shi, Y., Ke, G., Soukhavong, D., et al. (2025). \emph{lightgbm: Light Gradient Boosting Machine}.
+R package version 4.6.0. \url{https://CRAN.R-project.org/package=lightgbm}
+
+Tay, J. K., Narasimhan, B., & Hastie, T. (2023). Elastic Net Regularization Paths for All Generalized Linear Models.
+\emph{Journal of Statistical Software}, 106(1), 1-31. \doi{10.18637/jss.v106.i01}
 }
 \seealso{
 \code{\link{mff}} for the main framework application,

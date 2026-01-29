@@ -14,7 +14,7 @@ Authors@R: c(
       role = "aut"
     )
   )
-Description: Ensembles various models via fuzzy clustering methods.
+Description: Ensembles various prediction models for regression via meta fuzzy functions with different clustering methods.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

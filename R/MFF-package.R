@@ -25,7 +25,11 @@
 #' membership matrices and use them to construct a weighted ensemble of
 #' multiple base models.
 #'
-#' @keywords internal
+#' @author
+#' \strong{Maintainer}: Nihat Tak
+#' \strong{Authors}: Nihat Tak, Sadık Çoban
+#'
+#' @keywords NULL
 "_PACKAGE"
 
 ## usethis namespace: start

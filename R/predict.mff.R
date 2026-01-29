@@ -5,7 +5,7 @@
 #' Fuzzy Function framework on the test dataset.
 #'
 #' @param object an object of class mff (returned by mff() or tune.mff()).
-#' @param pred_matrix numeric matrix (\eqn{samples \times models}{samples x models}) of base predictions for the new data (e.g.,
+#' @param pred_matrix numeric matrix (\eqn{N_{test} \times M}) of base predictions for the new data (e.g.,
 #' test set).
 #' @param type 'best' uses the optimal configuration/cluster selected by tune.mff(); 'all' returns outputs
 #' for all tuned configurations.
@@ -55,16 +55,12 @@
 #'  selected, the corresponding weight vector is returned.
 #' }
 #'
-#' @references
-#' \itemize{
-#'   \item Zadeh, L. A. (1965). Fuzzy sets. \emph{Information and Control}, 8(3), 338-353.
-#' }
 #'
 #' @seealso \code{\link{mff}}, \code{\link{tune.mff}}, \code{\link{evaluate}}
 #'
 #' @examples
 #' \dontrun{
-#'   res <- model.train(target="medv", data=MASS::Boston, ntest=50, nvalid=50)
+#'   res <- model.train(target="medv", data=MASS::Boston, ntest=50, nvalid=50, seed = 123)
 #'   fit <- tune.mff(res$pred_matrix_valid, res$y_valid, max_c=6, mff.method="kmeans")
 #'   out <- predict(fit, pred_matrix=res$pred_matrix_test, type="best")
 #'   head(out$mff_preds)

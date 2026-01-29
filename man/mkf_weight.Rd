@@ -40,13 +40,13 @@ are zero.
 }
 \details{
 This internal helper function converts hard K-means cluster assignments
-into a simple membership weight matrix. Each element of the input vector
+into a simple weight matrix. Each element of the input vector
 represents the cluster index assigned to a model. The function computes
 weights based on cluster frequencies, assigning each model a weight
 inversely proportional to the size of its cluster.
 
-This function is intended to provide soft membership-like weights for
-K-means-based meta-modeling (MKF). Unlike fuzzy methods, weights do not sum
-to 1 across each row; they directly reflect inverse cluster frequencies.
+This function is intended to provide weights for Meta Fuzzy Function.
+Unlike fuzzy methods, weights do not sum to 1 across each row;
+they directly reflect inverse cluster frequencies.
 }
 \keyword{internal}

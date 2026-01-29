@@ -2,7 +2,7 @@
 % Please edit documentation in R/mff.R
 \name{mff}
 \alias{mff}
-\title{Generate Meta-Fuzzy Memberships and Cluster-Level Predictions}
+\title{Generate Meta-Fuzzy Function}
 \usage{
 mff(
   x,
@@ -76,20 +76,36 @@ interpretation and comparison across meta fuzzy functions.
     target = "medv",
     data = MASS::Boston,
     ntest = 50,
-    nvalid = 50
+    nvalid = 50,
+    seed = 123
  )
 
  mff_model <- mff(result_train$pred_matrix_valid, result_train$y_valid, c = 4,
  iter.max=100,nstart = 100,method = "kmeans")
  mff_model
 }
+
 }
 \references{
-\itemize{
-\item Bezdek, J. C., Ehrlich, R., & Full, W. (1984). FCM: The fuzzy c-means clustering algorithm. \emph{Computers & Geosciences}, 10(2-3), 191-203.
-\item Gustafson, E. E., & Kessel, W. C. (1978). Fuzzy clustering with a fuzzy covariance matrix. \emph{1978 IEEE Conference on Decision and Control including the 17th Symposium on Adaptive Processes}, 761-766.
-\item Pal, N. R., Pal, K., Keller, J. M., & Bezdek, J. C. (2005). A possibilistic fuzzy c-means clustering algorithm. \emph{IEEE Transactions on Fuzzy Systems}, 13(4), 517-530.
-}
+Tak, N. (2018). Meta fuzzy functions: Application of recurrent type-1 fuzzy functions.
+\emph{Applied Soft Computing}, 73, 1-13. \doi{10.1016/j.asoc.2018.08.009}
+
+Bezdek, J. C., Ehrlich, R., & Full, W. (1984). FCM: The fuzzy c-means clustering algorithm.
+\emph{Computers & Geosciences}, 10(2), 191-203. \doi{10.1016/0098-3004(84)90020-7}
+
+Cebeci, Z. (2019). Comparison of internal validity indices for fuzzy clustering.
+\emph{Journal of Agricultural Informatics}, 10(2), 1-14. \doi{10.17700/jai.2019.10.2.537}
+
+Gustafson, D. E., & Kessel, W. C. (1978). Fuzzy clustering with a fuzzy covariance matrix.
+In \emph{1978 IEEE Conference on Decision and Control including the 17th Symposium on Adaptive Processes},
+761-766. \doi{10.1109/CDC.1978.268028}
+
+Meyer, D., Dimitriadou, E., Hornik, K., Weingessel, A., & Leisch, F. (2024).
+\emph{e1071: Misc Functions of the Department of Statistics, Probability Theory Group (Formerly: E1071), TU Wien}.
+R package version 1.7-16. \url{https://CRAN.R-project.org/package=e1071}
+
+Pal, N. R., Pal, K., Keller, J. M., & Bezdek, J. C. (2005). A possibilistic fuzzy c-means clustering algorithm.
+\emph{IEEE Transactions on Fuzzy Systems}, 13(4), 517-530. \doi{10.1109/TFUZZ.2004.840099}
 }
 \seealso{
 \code{\link{model.train}} for preparing input matrices,

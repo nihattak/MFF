@@ -37,12 +37,6 @@ pred <- stats::predict(m)
 evaluate(pred, y)
 
 }
-\references{
-\itemize{
-\item Hyndman, R. J., & Koehler, A. B. (2006). Another look at measures of forecast accuracy. \emph{International Journal of Forecasting}, 22(4), 679-688.
-\item Willmott, C. J., & Matsuura, K. (2005). Advantages of the mean absolute error (MAE) over the root mean square error (RMSE) in assessing average model performance. \emph{Climate Research}, 30(1), 79-82.
-}
-}
 \seealso{
 \code{\link{mff}} for generating predictions,
 \code{\link{model.train}} for preparing base model prediction matrices,
