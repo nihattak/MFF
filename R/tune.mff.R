@@ -35,8 +35,7 @@
 #' setting.
 #'
 #' The search space depends on the selected membership-generation method. For classical Fuzzy
-#' C-Means ("fcm") and Gustafson-Kessel clustering ("gk"), the function explores combinations
-#' of the number of clusters c and the fuzziness index m. For possibilistic FCM ("pfcm"), the
+#' C-Means ("fcm"), the function explores combinations of the number of clusters c and the fuzziness index m. For possibilistic FCM ("pfcm"), the
 #' grid additionally includes the possibilistic regularization parameter \eqn{\eta}{eta}. For k-means
 #' ("kmeans"), the search is performed only over the number of clusters(c). The function returns
 #' the best-performing configuration together with the corresponding weight structure, the index
@@ -69,8 +68,8 @@
 #'
 #'
 #' @export
-tune.mff <- function(x, y, max_c = 5, m_seq = seq(1.1, 3, by = 0.1),eta_seq = seq(1.1, 3, by = 0.4), iter.max = 1000, nstart = 100,
-                     seed = 123, mff.method = c("fcm", "gk","pfcm", "kmeans") , eval.method = c("MAE","RMSE","MAPE","SMAPE","MSE","MedAE"),logging = T) {
+tune.mff <- function(x, y, max_c, m_seq = seq(1.1, 3, by = 0.1),eta_seq = seq(1.1, 3, by = 0.4), iter.max = 1000, nstart = 100,
+                     seed = 123, mff.method = c("fcm","pfcm", "kmeans") , eval.method = c("MAE","RMSE","MAPE","SMAPE","MSE","MedAE"),logging = T) {
   if (max_c > ncol(x)) {
     stop(sprintf(
       "Number of clusters (%d) cannot exceed the number of models (%d).",

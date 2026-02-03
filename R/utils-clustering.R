@@ -42,19 +42,23 @@
 #' they directly reflect inverse cluster frequencies.
 #'
 #' @keywords internal
-mkf_weight <- function(clusters) {
+.weight_kmeans <- function(clusters) {
   k <- max(clusters)
   n <- length(clusters)
 
+  # Hızlı frekans sayımı için tabulate kullanımı
   cluster_sizes <- tabulate(clusters, nbins = k)
 
+  # Ağırlık hesabı: Küme boyutuyla ters orantılı (1/size)
   weights <- 1 / cluster_sizes[clusters]
 
+  # Seyrek matris benzeri yapı oluşturma
   weight_matrix <- matrix(0, nrow = n, ncol = k)
   weight_matrix[cbind(seq_len(n), clusters)] <- weights
 
-  if (!is.null(names(clusters)))
+  if (!is.null(names(clusters))) {
     rownames(weight_matrix) <- names(clusters)
+  }
 
-  weight_matrix
+  return(weight_matrix)
 }

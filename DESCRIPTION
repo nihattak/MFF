@@ -30,4 +30,3 @@ Suggests:
     knitr,
     rmarkdown,
     MASS
-VignetteBuilder: knitr
