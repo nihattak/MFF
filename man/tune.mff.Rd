@@ -15,7 +15,7 @@ tune.mff(
   seed = 123,
   mff.method = c("fcm", "pfcm", "kmeans"),
   eval.method = c("MAE", "RMSE", "MAPE", "SMAPE", "MSE", "MedAE"),
-  logging = T
+  logging = TRUE
 )
 }
 \arguments{
@@ -85,13 +85,11 @@ of the best-performing meta fuzzy function, and the full set of evaluation resul
 transparent reporting and reproducible model selection.
 }
 \examples{
-\dontrun{
   res <- model.train(target="medv", data=MASS::Boston, ntest=50, nvalid=50, seed = 123)
   fit <- tune.mff(res$pred_matrix_valid, res$y_valid, max_c=6, mff.method="kmeans")
   out <- predict(fit, pred_matrix=res$pred_matrix_test, type="best")
   head(out$mff_preds)
   out$mff_weights
-}
 
 
 }

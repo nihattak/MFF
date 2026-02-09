@@ -76,7 +76,6 @@
 #' \code{\link{tune.mff}} for hyperparameter optimization,
 #'
 #' @examples
-#' \dontrun{
 #'  boston <- MASS::Boston
 #'   result <- model.train(
 #'     target = "medv",
@@ -88,7 +87,6 @@
 #'
 #'   head(result$pred_matrix_valid)
 #'   head(result$pred_matrix_test)
-#' }
 #'
 #' @importFrom glmnet cv.glmnet glmnet
 #' @importFrom randomForest randomForest

@@ -59,13 +59,11 @@
 #' @seealso \code{\link{mff}}, \code{\link{tune.mff}}, \code{\link{evaluate}}
 #'
 #' @examples
-#' \dontrun{
 #'   res <- model.train(target="medv", data=MASS::Boston, ntest=50, nvalid=50, seed = 123)
 #'   fit <- tune.mff(res$pred_matrix_valid, res$y_valid, max_c=6, mff.method="kmeans")
 #'   out <- predict(fit, pred_matrix=res$pred_matrix_test, type="best")
 #'   head(out$mff_preds)
 #'   out$mff_weights
-#' }
 #'
 #' @export
 predict.mff <- function(object, pred_matrix, type = c("best", "all"), ...) {

@@ -60,7 +60,6 @@ Accordingly, the \code{model.train} function can be completely skipped while sti
 MFF framework with precomputed model outputs.
 }
 \examples{
-\dontrun{
  boston <- MASS::Boston
   result <- model.train(
     target = "medv",
@@ -72,7 +71,6 @@ MFF framework with precomputed model outputs.
 
   head(result$pred_matrix_valid)
   head(result$pred_matrix_test)
-}
 
 }
 \references{

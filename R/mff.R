@@ -71,7 +71,6 @@
 #'
 #'
 #' @examples
-#' \dontrun{
 #'  result_train <- model.train(
 #'     target = "medv",
 #'     data = MASS::Boston,
@@ -83,7 +82,6 @@
 #'  mff_model <- mff(result_train$pred_matrix_valid, result_train$y_valid, c = 4,
 #'  iter.max=100,nstart = 100,method = "kmeans")
 #'  mff_model
-#'}
 #'
 #'
 #' @export

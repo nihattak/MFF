@@ -70,7 +70,6 @@ contribution of base models within each meta fuzzy function sums to one, facilit
 interpretation and comparison across meta fuzzy functions.
 }
 \examples{
-\dontrun{
  result_train <- model.train(
     target = "medv",
     data = MASS::Boston,
@@ -82,7 +81,6 @@ interpretation and comparison across meta fuzzy functions.
  mff_model <- mff(result_train$pred_matrix_valid, result_train$y_valid, c = 4,
  iter.max=100,nstart = 100,method = "kmeans")
  mff_model
-}
 
 
 }
