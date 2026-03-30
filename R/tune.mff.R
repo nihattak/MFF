@@ -24,6 +24,13 @@
 #' @param mff.method A character string selecting the membership-generation method.
 #' @param eval.method A character string specifying the metric used to select the best-performing
 #' meta fuzzy function.
+#' @param stand Logical; if \code{TRUE}, the transposed data is standardized
+#' (mean=0, sd=1) before clustering to ensure scale-invariance between models.
+#' @param parallel Logical; if \code{TRUE}, the grid search process is executed in parallel
+#' to accelerate hyperparameter optimization.
+#' @param num_cores An integer specifying the number of CPU cores to utilize for
+#' parallel processing. If \code{NULL} (default), the function automatically detects
+#' and uses all available cores minus one (\code{parallel::detectCores() - 1}).
 #' @param logging A logical flag indicating whether progress information is printed during the search.
 #'
 #' @details
@@ -64,107 +71,107 @@
 #'   head(out$mff_preds)
 #'   out$mff_weights
 #'
-#'
+#' @importFrom foreach foreach %dopar%
+#' @importFrom parallel makeCluster stopCluster detectCores
+#' @importFrom doParallel registerDoParallel
 #' @export
-tune.mff <- function(x, y, max_c, m_seq = seq(1.1, 3, by = 0.1),eta_seq = seq(1.1, 3, by = 0.4), iter.max = 1000, nstart = 100,
-                     seed = 123, mff.method = c("fcm","pfcm", "kmeans") , eval.method = c("MAE","RMSE","MAPE","SMAPE","MSE","MedAE"),logging = TRUE) {
-  if (max_c > ncol(x)) {
-    stop(sprintf(
-      "Number of clusters (%d) cannot exceed the number of models (%d).",
-      max_c, ncol(x)
-    ))
-  }
+tune.mff <- function(x, y, max_c, m_seq = seq(1.1, 3, by = 0.1),
+                     eta_seq = seq(1.1, 3, by = 0.4), iter.max = NULL,
+                     nstart = 1, seed = 123,
+                     mff.method = c("fcm", "pfcm", "kmeans", "gk"),
+                     eval.method = c("MAE", "RMSE", "MAPE", "SMAPE", "MSE", "MedAE"),
+                     stand = FALSE, parallel = FALSE, num_cores = NULL, logging = TRUE) {
 
-  best_method <- Inf
-  best_c <- NA
-  best_m <- NA
-  best_eta <- NA
+  if (max_c > ncol(x)) {
+    stop(sprintf("Number of clusters (%d) cannot exceed models (%d).", max_c, ncol(x)))
+  }
 
   mff.method <- match.arg(mff.method)
   eval.method <- match.arg(eval.method)
 
+  # --- 1. Grid Construction ---
   if (mff.method == "pfcm") {
-    search_grid <- expand.grid(
-      m = m_seq,
-      c = 2:max_c,
-      eta = eta_seq,
-      iter.max = iter.max,
-      nstart = nstart,
-      KEEP.OUT.ATTRS = FALSE
-    )
-  } else if (mff.method %in% c("fcm")) {
-    search_grid <- expand.grid(
-      m = m_seq,
-      c = 2:max_c,
-      iter.max = iter.max,
-      KEEP.OUT.ATTRS = FALSE
-    )
-  } else if (mff.method %in% c("gk")) {
-    search_grid <- expand.grid(
-      m = m_seq,
-      c = 2:max_c,
-      iter.max = iter.max,
-      nstart = nstart,
-      KEEP.OUT.ATTRS = FALSE
-    )
+    search_grid <- expand.grid(m = m_seq, c = 2:max_c, eta = eta_seq,
+                                nstart = nstart, KEEP.OUT.ATTRS = FALSE)
+  } else if (mff.method == "fcm") {
+    search_grid <- expand.grid(m = m_seq, c = 2:max_c, KEEP.OUT.ATTRS = FALSE)
+  } else if (mff.method == "gk") {
+    search_grid <- expand.grid(m = m_seq, c = 2:max_c,
+                               nstart = nstart, KEEP.OUT.ATTRS = FALSE)
   } else if (mff.method == "kmeans") {
-    search_grid <- expand.grid(c = 2:max_c,nstart = nstart,iter.max=iter.max, KEEP.OUT.ATTRS = FALSE)
-  } else {
-    stop("Unknown method.")
+    search_grid <- expand.grid(c = 2:max_c, nstart = nstart, KEEP.OUT.ATTRS = FALSE)
   }
 
-  if(logging) cat("Number of Combinations:",nrow(search_grid),"\nIterations: ")
+  num_combinations <- nrow(search_grid)
+  if(logging) cat("Number of Combinations:", num_combinations, "\n")
 
-  for (i in 1:nrow(search_grid)) {
-    set.seed(seed)
+  # --- 2. Parallel Setup ---
+  if (parallel) {
+    if (!requireNamespace("doParallel", quietly = TRUE)) stop("Package 'doParallel' is required for parallel processing.")
+    if (!requireNamespace("foreach", quietly = TRUE)) stop("Package 'foreach' is required for parallel processing.")
+
+    if (is.null(num_cores)) num_cores <- parallel::detectCores() - 1
+    cl <- parallel::makeCluster(num_cores)
+    doParallel::registerDoParallel(cl)
+    on.exit(parallel::stopCluster(cl)) # Ensure cluster stops even if function fails
+
+    if(logging) cat("Running in parallel across", num_cores, "cores...\n")
+  }
+
+  # --- 3. Execution ---
+  # We use a helper to wrap the logic so it works for both serial and parallel
+  run_iteration <- function(i) {
+    set.seed(seed + i) # Ensure each worker has a unique but reproducible seed
     params <- as.list(search_grid[i, , drop = FALSE])
 
     mff_result <- mff(
-      x = x,
-      y = y,
-      c = params$c,
-      m = params$m,
-      eta = params$eta,
-      iter.max = params$iter.max,
-      nstart = params$nstart,
-      method = mff.method
+      x = x, y = y, c = params$c,
+      m = params$m, eta = params$eta,
+      iter.max = iter.max, nstart = params$nstart,
+      method = mff.method,
+      stand = stand
     )
 
-    if(logging){
-      cat(i,"",sep = " ")
-    }
-
-    current_metric <- min(mff_result$cluster_scores[,eval.method])
-
-    if (current_metric < best_method) {
-      best_preds <- mff_result$cluster_preds
-      best_method <- current_metric
-      best_params <- params
-      weights <- mff_result$weights
-      best_scores <- mff_result$cluster_scores
-    }
+    # Return metric and result
+    metric <- min(mff_result$cluster_scores[, eval.method])
+    return(list(metric = metric, result = mff_result, params = params))
   }
 
-  if(logging) cat("\n")
+  if (parallel) {
+    # Parallel loop using foreach
+    all_results <- foreach::foreach(i = 1:num_combinations,
+                                    .packages = c("e1071", "ppclust", "stats"),
+                                    .export = c("mff", "evaluate", ".weight_kmeans")) %dopar% {
+      run_iteration(i)
+    }
+  } else {
+    # Standard serial loop
+    all_results <- list()
+    for (i in 1:num_combinations) {
+      if(logging) cat(i, " ")
+      all_results[[i]] <- run_iteration(i)
+    }
+    if(logging) cat("\n")
+  }
 
-  idx <- unname(which.min(best_scores[,eval.method]))
+  # --- 4. Best Model Selection ---
+  metrics <- sapply(all_results, function(res) res$metric)
+  best_idx <- which.min(metrics)
+  best_res <- all_results[[best_idx]]$result
 
-  best_weight <- weights[, idx]
+  idx_in_cluster <- unname(which.min(best_res$cluster_scores[, eval.method]))
+  best_weight <- best_res$weights[, idx_in_cluster]
 
   out <- list(
     algorithm = mff.method,
     eval.method = eval.method,
-    weights = weights,
-    best_params = best_params,
-    best_cluster = idx,
+    weights = best_res$weights,
+    best_params = all_results[[best_idx]]$params,
+    best_cluster = idx_in_cluster,
     best_weight = best_weight,
-    best_scores = best_scores
+    best_scores = best_res$cluster_scores
   )
 
-  out <- structure(
-    out,
-    class = "mff"
-  )
-
+  out <- structure(out, class = "mff")
   return(out)
 }

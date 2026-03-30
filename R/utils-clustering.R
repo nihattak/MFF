@@ -42,6 +42,7 @@
 #' they directly reflect inverse cluster frequencies.
 #'
 #' @keywords internal
+#' @noRd
 .weight_kmeans <- function(clusters) {
   k <- max(clusters)
   n <- length(clusters)

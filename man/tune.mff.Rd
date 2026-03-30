@@ -10,11 +10,14 @@ tune.mff(
   max_c,
   m_seq = seq(1.1, 3, by = 0.1),
   eta_seq = seq(1.1, 3, by = 0.4),
-  iter.max = 1000,
-  nstart = 100,
+  iter.max = NULL,
+  nstart = 1,
   seed = 123,
-  mff.method = c("fcm", "pfcm", "kmeans"),
+  mff.method = c("fcm", "pfcm", "kmeans", "gk"),
   eval.method = c("MAE", "RMSE", "MAPE", "SMAPE", "MSE", "MedAE"),
+  stand = FALSE,
+  parallel = FALSE,
+  num_cores = NULL,
   logging = TRUE
 )
 }
@@ -47,6 +50,16 @@ and parameter search.}
 
 \item{eval.method}{A character string specifying the metric used to select the best-performing
 meta fuzzy function.}
+
+\item{stand}{Logical; if \code{TRUE}, the transposed data is standardized
+(mean=0, sd=1) before clustering to ensure scale-invariance between models.}
+
+\item{parallel}{Logical; if \code{TRUE}, the grid search process is executed in parallel
+to accelerate hyperparameter optimization.}
+
+\item{num_cores}{An integer specifying the number of CPU cores to utilize for
+parallel processing. If \code{NULL} (default), the function automatically detects
+and uses all available cores minus one (\code{parallel::detectCores() - 1}).}
 
 \item{logging}{A logical flag indicating whether progress information is printed during the search.}
 }
@@ -90,7 +103,6 @@ transparent reporting and reproducible model selection.
   out <- predict(fit, pred_matrix=res$pred_matrix_test, type="best")
   head(out$mff_preds)
   out$mff_weights
-
 
 }
 \seealso{

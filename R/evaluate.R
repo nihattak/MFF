@@ -17,7 +17,7 @@
 #' metrics; when a prediction matrix is provided, metrics are computed separately for each meta
 #' fuzzy function.
 #'
-#' @return A data frame with columns MAE, RMSE, MAPE, SMAPE, MSE, and MedAE, with one row
+#' @return A matrix with columns MAE, RMSE, MAPE, SMAPE, MSE, and MedAE, with one row
 #' per evaluated prediction vector.
 #'
 #' @seealso
