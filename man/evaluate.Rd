@@ -13,7 +13,7 @@ separately.}
 \item{actual}{numeric vector of true target values.}
 }
 \value{
-A data frame with columns MAE, RMSE, MAPE, SMAPE, MSE, and MedAE, with one row
+A matrix with columns MAE, RMSE, MAPE, SMAPE, MSE, and MedAE, with one row
 per evaluated prediction vector.
 }
 \description{

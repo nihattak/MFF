@@ -31,8 +31,8 @@
 #' form meta fuzzy function predictions through weighted aggregation of base-model outputs.
 #'
 #' The function supports four membership-generation methods: classical Fuzzy C-Means
-#' (FCM), Gustafson--Kessel (GK) clustering for anisotropic structures, possibilistic FCM (PFCM) producing softmax-like weights, and deterministic k-means converted to pseudo-
-#' fuzzy memberships. After membership estimation, meta fuzzy function predictions are
+#' (FCM), Gustafson-Kessel (GK) clustering for non-spherical structures, Possibilistic FCM (PFCM) producing softmax-like weights, and deterministic k-means for a situation with no uncertainty.
+#' After membership estimation, meta fuzzy function predictions are
 #' computed via linear combinations of base-model predictions and the learned membership-
 #' based weights, and the predictive performance of each meta fuzzy function is assessed using
 #' \emph{evaluate}. Membership weights are standardized column-wise to ensure that the total

@@ -1,7 +1,7 @@
 Package: MFF
 Type: Package
 Title: Meta Fuzzy Functions
-Version: 0.1.0
+Version: 0.2.0
 Authors@R: c(
     person(
       "Nihat", "Tak",
@@ -14,7 +14,7 @@ Authors@R: c(
       role = "aut"
     )
   )
-Description: Implements Meta Fuzzy Functions (MFFs) for regression Tak and Ucan (2026) <doi:10.1016/j.asoc.2026.114592> by aggregating predictions from multiple base learners using membership weights learned in the prediction space of validation set. The package supports fuzzy and crisp meta-ensemble structures via Fuzzy C-Means (FCM) Tak (2018) <doi:10.1016/j.asoc.2018.08.009>, Possibilistic FCM (PFCM) Tak (2021) <doi:10.1016/j.ins.2021.01.024>, and k-means, and provides a workflow to (i) generate validation/test prediction matrices from common regression learners (linear and penalized regression via 'glmnet', random forests, gradient boosting with 'xgboost' and 'lightgbm'), (ii) fit cluster-wise meta fuzzy functions and compute membership-based weights, (iii) tune clustering-related hyperparameters (number of clusters/functions, fuzziness exponent, possibilistic regularization) via grid search on validation loss, and (iv) predict on new/test prediction matrices and evaluate performance using standard regression metrics (MAE, RMSE, MAPE, SMAPE, MSE, MedAE). This enables flexible, interpretable ensemble regression where different base models contribute to different meta components according to learned memberships.
+Description: Implements Meta Fuzzy Functions (MFFs) for regression Tak and Ucan (2026) <doi:10.1016/j.asoc.2026.114592> by aggregating predictions from multiple base learners using membership weights learned in the prediction space of validation set. The package supports fuzzy and crisp meta-ensemble structures via Fuzzy C-Means (FCM) Tak (2018) <doi:10.1016/j.asoc.2018.08.009>, Possibilistic FCM (PFCM) Tak (2021) <doi:10.1016/j.ins.2021.01.024>, Gustafson–Kessel (GK) clustering, and k-means, and provides a workflow to (i) generate validation/test prediction matrices from common regression learners (linear and penalized regression via 'glmnet', random forests, gradient boosting with 'xgboost' and 'lightgbm'), (ii) fit cluster-wise meta fuzzy functions and compute membership-based weights, (iii) tune clustering-related hyperparameters (number of clusters/functions, fuzziness exponent, possibilistic regularization) via grid search on validation loss, and (iv) predict on new/test prediction matrices and evaluate performance using standard regression metrics (MAE, RMSE, MAPE, SMAPE, MSE, MedAE). This enables flexible, interpretable ensemble regression where different base models contribute to different meta components according to learned memberships.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
@@ -28,8 +28,7 @@ Imports:
     ppclust,
     doParallel,
     foreach,
-    parallel,
-    mclust
+    parallel
 Suggests: 
     knitr,
     rmarkdown,

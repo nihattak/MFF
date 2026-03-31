@@ -16,8 +16,9 @@
 #'   \item{\code{mff()}}{Fits Meta Fuzzy Regression Functions models by estimating fuzzy membership weights from base-model prediction matrices and constructing cluster-wise meta regression functions.}
 #'   \item{\code{tune.mff()}}{Performs hyperparameter optimization for MFF models via grid search over clustering-related parameters, selecting the configuration that minimizes a chosen validation error metric.}
 #'   \item{\code{predict.mff()}}{S3 prediction method for fitted or tuned MFF objects, generating test-set predictions using membership-weighted aggregation of base-model outputs.}
-#'   \item{\code{evaluate()}}{Convenience function for training multiple regression models and producing validation and test prediction matrices suitable for MFF modeling.}
-#'   \item{\code{model.train()}}{Computes regression performance metrics (e.g., MAE, RMSE, MAPE, SMAPE, MSE, MedAE) for comparing meta fuzzy functions and base-model predictions.}
+#'   \item{\code{evaluate()}}{Computes regression performance metrics (e.g., MAE, RMSE, MAPE, SMAPE, MSE, MedAE) for comparing meta fuzzy functions and base-model predictions.}
+#'   \item{\code{model.train()}}{Convenience function for training multiple regression models and producing validation and test prediction matrices suitable for MFF modeling.}
+#'   \item{\code{boot.train()}}{Convenience function for training bagging for multiple linear regression models and producing validation and test prediction matrices suitable for MFF modeling.}
 #' }
 #'
 #' @section Acknowledgements:

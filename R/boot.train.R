@@ -1,21 +1,14 @@
-#' Bootstrap Training and Prediction for Linear Models
+#' Train Bagging for Multiple Linear Regression and Produce Model Predictions
 #'
 #' @description
-#' Splits the input dataset into training, validation, and test sets, then performs
-#' bootstrap sampling on the training set to fit multiple linear models. It generates
-#' prediction matrices for both validation and test sets by aggregating results
+#' It generates prediction matrices for both validation and test sets by aggregating results
 #' from all bootstrap iterations.
 #'
 #' @details
-#' The function follows a strict pipeline:
-#' \enumerate{
-#'   \item Validates input arguments and data integrity.
-#'   \item Partition the data into validation, test, and training sets.
-#'   \item Executes \code{B} bootstrap iterations (optionally in parallel).
-#'   \item In each iteration, a linear model (\code{lm}) is fitted on a bootstrap sample
-#'   of the training data.
-#'   \item Returns the predicted values and actual target values for performance evaluation.
-#' }
+#' Splits the input dataset into training, validation, and test sets, then performs
+#' bootstrap sampling on the training set to fit multiple linear models.
+#' Predictions are returned as matrices with dimension \eqn{N_{valid} \times B} and \eqn{N_{test} \times B}.
+#' These matrices are the standard input \eqn{x}{x} for \code{mff()} and \code{tune.mff()}.
 #'
 #' @param target A character string specifying the name of the response variable.
 #' @param data A \code{data.frame} containing the target and predictor variables.
@@ -30,11 +23,11 @@
 #'
 #' @return A list containing the following components:
 #' \itemize{
-#'   \item \code{pred_matrix_valid}: A matrix of dimensions \code{[nvalid, B]} containing validation set predictions.
-#'   \item \code{pred_matrix_test}: A matrix of dimensions \code{[ntest, B]} containing test set predictions.
+#'   \item \code{pred_matrix_valid}: A matrix of dimensions \eqn{N_{valid} \times B} containing validation set predictions.
+#'   \item \code{pred_matrix_test}: A matrix of dimensions \eqn{N_{test} \times B} containing test set predictions.
 #'   \item \code{y_valid}: A numeric vector of actual target values for the validation set.
 #'   \item \code{y_test}: A numeric vector of actual target values for the test set.
-#'   \item \code{metadata}: A list containing the number of training samples (\code{n_train}),
+#'   \item \code{metadata}: A list containing the number of training samples (\code{ntrain}),
 #'   the number of bootstrap iterations (\code{B}), and parallel processing status.
 #' }
 #' @examples
@@ -161,6 +154,6 @@ boot.train <- function(target, data, ntest, nvalid, B, seed = NULL, parallel = F
     pred_matrix_test  = final_results$test,
     y_valid = valid_data[[target]],
     y_test  = test_data[[target]],
-    metadata = list(n_train = ntrain, B = B, parallel = parallel)
+    metadata = list(ntrain = ntrain, B = B, parallel = parallel)
   ))
 }
